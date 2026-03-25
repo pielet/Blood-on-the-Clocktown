@@ -1,0 +1,27 @@
+.DS_Store
+
+# Xcode user state
+xcuserdata/
+**/xcuserdata/
+*.xcuserstate
+
+# Build artifacts
+DerivedData/
+build/
+*.xcarchive
+
+# Test results
+*.xcresult
+
+# Swift Package Manager
+.build/
+.swiftpm/
+Package.resolved
+
+# Python
+__pycache__/
+*.pyc
+
+# Generated image artifacts
+imgs/
+DownloadedRoleIcons/

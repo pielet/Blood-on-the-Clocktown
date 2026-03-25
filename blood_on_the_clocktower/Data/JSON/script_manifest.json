@@ -1,0 +1,19 @@
+{
+  "editions": [
+    {
+      "id": "trouble-brewing",
+      "fileName": "trouble_brewing",
+      "experimentalOverlayFileName": "experimental_trouble_brewing"
+    },
+    {
+      "id": "bad-moon-rising",
+      "fileName": "bad_moon_rising",
+      "experimentalOverlayFileName": "experimental_bad_moon_rising"
+    },
+    {
+      "id": "sects-and-violets",
+      "fileName": "sects_and_violets",
+      "experimentalOverlayFileName": "experimental_sects_and_violets"
+    }
+  ]
+}

@@ -1,0 +1,13 @@
+{
+  "images" : [
+    {
+      "filename" : "role_gossip.png",
+      "idiom" : "universal",
+      "scale" : "1x"
+    }
+  ],
+  "info" : {
+    "author" : "xcode",
+    "version" : 1
+  }
+}

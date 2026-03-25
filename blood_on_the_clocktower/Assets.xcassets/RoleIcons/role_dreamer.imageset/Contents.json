@@ -1,0 +1,13 @@
+{
+  "images" : [
+    {
+      "filename" : "role_dreamer.png",
+      "idiom" : "universal",
+      "scale" : "1x"
+    }
+  ],
+  "info" : {
+    "author" : "xcode",
+    "version" : 1
+  }
+}

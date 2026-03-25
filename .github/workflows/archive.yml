@@ -1,0 +1,32 @@
+name: Archive
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  archive:
+    name: Archive Release Build
+    runs-on: macos-15
+    steps:
+      - uses: actions/checkout@v4
+      - name: Select Xcode
+        run: sudo xcode-select -s /Applications/Xcode.app
+      - name: Archive
+        run: |
+          xcodebuild archive \
+            -project blood_on_the_clocktower.xcodeproj \
+            -scheme blood_on_the_clocktower \
+            -configuration Release \
+            -sdk iphoneos \
+            -destination "generic/platform=iOS" \
+            -archivePath build/blood_on_the_clocktower.xcarchive \
+            CODE_SIGN_IDENTITY=- \
+            AD_HOC_CODE_SIGNING_ALLOWED=YES
+      - name: Upload Archive
+        uses: actions/upload-artifact@v4
+        with:
+          name: blood_on_the_clocktower-${{ github.ref_name }}.xcarchive
+          path: build/blood_on_the_clocktower.xcarchive
+          retention-days: 90

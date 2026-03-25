@@ -1,0 +1,13 @@
+{
+  "images" : [
+    {
+      "filename" : "role_mezepheles.png",
+      "idiom" : "universal",
+      "scale" : "1x"
+    }
+  ],
+  "info" : {
+    "author" : "xcode",
+    "version" : 1
+  }
+}

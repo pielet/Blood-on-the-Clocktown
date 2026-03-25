@@ -1,0 +1,13 @@
+{
+  "images" : [
+    {
+      "filename" : "role_tea-lady.png",
+      "idiom" : "universal",
+      "scale" : "1x"
+    }
+  ],
+  "info" : {
+    "author" : "xcode",
+    "version" : 1
+  }
+}

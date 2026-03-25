@@ -1,0 +1,75 @@
+# Changelog
+
+All notable changes to this project will be documented in this file.
+
+The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
+and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+
+## [1.0.1] - 2026-03-25
+
+### Fixed
+
+- Poisoner poison now persists through the following day until dusk, matching official rules ("poisoned tonight and tomorrow day"). Previously cleared at dawn.
+- Poisoner death now ends existing poison immediately (checks Poisoner alive).
+- Scarlet Woman correctly gets priority when exactly 5 players are alive before Imp self-kill (off-by-one in alive count).
+- Slayer can now kill the Recluse if the storyteller chooses Demon registration (flexible registration prompt added).
+- Poisoned Slayer shot correctly fails during the day (poison persists through day).
+
+### Added
+
+- Storyteller prompt when Slayer targets a Recluse: choose whether Recluse registers as Demon.
+- Persistent poison status indicator for Poisoner targets ("Poisoned by Poisoner (until dusk)").
+- 7 new unit tests: Poisoner day persistence, Poisoner dusk expiry, Poisoner death clears poison, Scarlet Woman 5-alive threshold, Slayer vs Recluse (both outcomes), poisoned Slayer during day.
+- Trace tests now handle Imp replacement selection, Slayer Recluse prompts, and Virgin registration prompts.
+- Pre-commit hook: blocks large files, gitignored files, and merge conflict markers.
+- PR template for standardized pull request descriptions.
+
+### Changed
+
+- `run_blood.sh`: removed broken `run_logic_dry_run` reference, auto-detects simulator when none specified.
+- `.gitignore`: added `*.xcresult`, `*.xcarchive`, `__pycache__/`, generated image directories.
+
+## [1.0.0] - 2026-03-25
+
+### Added
+
+- Script selection for Trouble Brewing, Bad Moon Rising, and Sects & Violets.
+- Optional experimental role toggles for each edition.
+- Player setup with configurable player count (5-20).
+- Role deck building with automatic team distribution (Baron outsider shift, Vigormortis reduction, Fang Gu extra outsider, etc.).
+- Secret role assignment flow with flip-card reveal UI.
+- Imp bluff setup panel for Demon players.
+- First night and subsequent night phases with role-ordered wake queue.
+- Day phase with nomination, voting (Butler master restriction, ghost votes), and execution.
+- Storyteller-assisted night actions: target selection, info-role results, flexible registration overrides.
+- Poisoner suppression with misinformation-flagged logs for info roles.
+- Drunk shown-role mechanics: fake Townsfolk identity with false night info.
+- Monk protection, Soldier survival, Slayer day-action, Virgin trigger.
+- Scarlet Woman demon succession at 5+ alive players.
+- Imp self-kill with Minion promotion.
+- Saint execution loss, Mayor no-execution win.
+- Evil Twin pair setup blocking immediate good win when Demon dies.
+- Fortune Teller red-herring selection.
+- Moonchild death-trigger target choice.
+- Banshee double-nomination after Demon kill.
+- Cult Leader alignment flip and alternate win condition.
+- Fearmonger chosen-target execution win.
+- Legion only-evil-votes-don't-count mechanic.
+- Game-over detection: no demons alive, evil population lead, saint executed, mayor survived, evil no winning path.
+- Bilingual UI: English and Simplified Chinese throughout.
+- Day timer with configurable duration and pause/resume.
+- Game log with timestamped events and misinformation markers.
+- Night action records for storyteller reference.
+- 100+ role icon assets.
+- 53 unit tests and 50-seed deterministic trace tests for Trouble Brewing.
+- CI pipeline: SwiftLint (strict), build, test with artifact upload.
+- Dependabot for GitHub Actions version updates.
+- Release drafter for automatic changelog generation from PRs.
+- Archive workflow for tagged releases.
+
+### Known Issues
+
+- Bad Moon Rising edition: gameplay logic has known bugs in several role interactions (Zombuul, Pukka, Shabaloth, Po demon mechanics; Godfather, Devil's Advocate, Assassin, Mastermind minion mechanics; Gambler, Gossip, Professor risk/recovery roles). Tests for these roles are pending.
+- Sects & Violets edition: gameplay logic has known bugs in several role interactions (Fang Gu jump, Vigormortis neighbor poisoning, No Dashii neighbor poisoning, Vortox false-info enforcement; Pit-Hag character changes, Cerenovus madness, Witch curse tracking). Tests for these roles are pending.
+- Experimental roles: many roles are marked as storyteller-resolved or manual. Automated logic coverage is partial. Tests for experimental roles are minimal.
+- UI tests (blood_on_the_clocktowerUITests) are scaffolded but not yet implemented.

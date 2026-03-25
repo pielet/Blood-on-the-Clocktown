@@ -1,0 +1,29 @@
+included:
+  - blood_on_the_clocktower
+  - blood_on_the_clocktowerTests
+
+excluded:
+  - blood_on_the_clocktowerUITests
+  - build
+  - DerivedData
+
+# Relaxed rules suitable for a game logic app with large switch statements
+disabled_rules:
+  - trailing_whitespace        # noisy, low value
+  - line_length                # game logic has long lines (bilingual strings, switch cases)
+  - type_body_length           # ViewModel is necessarily large
+  - file_length                # same reason
+  - function_body_length       # completeCurrentNightAction is a big switch
+  - cyclomatic_complexity      # big switch statements are clear, not complex
+  - large_tuple                # used in some return types
+  - inclusive_language          # "master" is a game term (Butler's master, Mastermind role)
+
+opt_in_rules:
+  - empty_count               # prefer .isEmpty over .count == 0
+  - force_unwrapping           # warn on force unwraps
+  - closure_spacing            # consistent closure formatting
+
+# Raise thresholds for known patterns
+identifier_name:
+  min_length:
+    warning: 1                 # allow single-char vars (i, x, etc.)
