@@ -20,7 +20,7 @@ struct ImpBluffSetupView: View {
             Text(
                 game.ui(
                     "Choose 3 bluff roles.",
-                    "选择 3 个诈唬角色。"
+                    "选择3个不在场角色"
                 )
             )
             .font(.headline)
@@ -29,7 +29,7 @@ struct ImpBluffSetupView: View {
                 Text(
                     game.ui(
                         "Show to \(impPlayer.name). In-play good roles never appear. If the Drunk is in play, the role they think they are also will not appear.",
-                        "展示给 \(impPlayer.name)。已在场的善良角色不会出现。若酒鬼在场，其自认为的角色也不会出现。"
+                        "展示给 \(impPlayer.name)。已在场的善良角色和酒鬼不会出现。若酒鬼在场，其自认为的角色也不会出现。"
                     )
                 )
                 .font(.caption)
