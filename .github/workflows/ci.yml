@@ -61,7 +61,7 @@ jobs:
             -resultBundlePath UnitTestResults.xcresult
       - name: Upload Unit Test Results
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: unit-test-results
           path: UnitTestResults.xcresult
@@ -93,7 +93,7 @@ jobs:
             -resultBundlePath UITestResults.xcresult
       - name: Upload UI Test Results
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: ui-test-results
           path: UITestResults.xcresult

@@ -25,7 +25,7 @@ jobs:
             CODE_SIGN_IDENTITY=- \
             AD_HOC_CODE_SIGNING_ALLOWED=YES
       - name: Upload Archive
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: blood_on_the_clocktower-${{ github.ref_name }}.xcarchive
           path: build/blood_on_the_clocktower.xcarchive
