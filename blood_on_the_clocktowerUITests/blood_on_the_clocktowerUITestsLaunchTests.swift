@@ -1,17 +1,6 @@
-//
-//  blood_on_the_clocktowerUITestsLaunchTests.swift
-//  blood_on_the_clocktowerUITests
-//
-//  Created by shiyang on 3/23/26.
-//
-
 import XCTest
 
 final class blood_on_the_clocktowerUITestsLaunchTests: XCTestCase {
-
-    override class var runsForEachTargetApplicationUIConfiguration: Bool {
-        true
-    }
 
     override func setUpWithError() throws {
         continueAfterFailure = false
@@ -20,10 +9,7 @@ final class blood_on_the_clocktowerUITestsLaunchTests: XCTestCase {
     @MainActor
     func testLaunch() throws {
         let app = XCUIApplication()
-                app.launch()
-
-        // Insert steps here to perform after app launch but before taking a screenshot,
-        // such as logging into a test account or navigating somewhere in the app
+        app.launch()
 
         let attachment = XCTAttachment(screenshot: app.screenshot())
         attachment.name = "Launch Screen"
