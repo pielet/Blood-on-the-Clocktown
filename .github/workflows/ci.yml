@@ -15,7 +15,7 @@ jobs:
     name: SwiftLint
     runs-on: macos-15
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - name: Install SwiftLint
         run: brew install swiftlint
       - name: Run SwiftLint
@@ -26,7 +26,7 @@ jobs:
     runs-on: macos-15
     needs: lint
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - name: Select Xcode
         run: sudo xcode-select -s /Applications/Xcode.app
       - name: Build for iOS Simulator
@@ -43,7 +43,7 @@ jobs:
     runs-on: macos-15
     needs: build
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - name: Select Xcode
         run: sudo xcode-select -s /Applications/Xcode.app
       - name: List Available Simulators
@@ -61,7 +61,7 @@ jobs:
             -resultBundlePath UnitTestResults.xcresult
       - name: Upload Unit Test Results
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: unit-test-results
           path: UnitTestResults.xcresult
@@ -72,7 +72,7 @@ jobs:
     runs-on: macos-15
     needs: build
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - name: Select Xcode
         run: sudo xcode-select -s /Applications/Xcode.app
       - name: List Available Simulators
@@ -93,7 +93,7 @@ jobs:
             -resultBundlePath UITestResults.xcresult
       - name: Upload UI Test Results
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: ui-test-results
           path: UITestResults.xcresult
