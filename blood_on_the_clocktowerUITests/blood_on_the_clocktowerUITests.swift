@@ -3,6 +3,7 @@ import XCTest
 final class BloodOnTheClockTowerUITests: XCTestCase {
 
     private var app: XCUIApplication!
+    private let playerCount = 5
 
     override func setUpWithError() throws {
         continueAfterFailure = false
@@ -20,46 +21,47 @@ final class BloodOnTheClockTowerUITests: XCTestCase {
     func testFullTroubleBrewingGame() throws {
         // 1. Select Trouble Brewing template
         let templateButton = app.buttons["template-trouble_brewing"]
-        XCTAssertTrue(templateButton.waitForExistence(timeout: 15), "Trouble Brewing template button should exist")
+        XCTAssertTrue(templateButton.waitForExistence(timeout: 10), "Trouble Brewing template button should exist")
         templateButton.tap()
 
         // 2. Player setup — use 5 players (minimum, fastest game)
         let drawButton = app.buttons["setup-drawRoles"]
-        XCTAssertTrue(drawButton.waitForExistence(timeout: 10), "Draw Roles button should exist")
-        // Tap the stepper decrement to get to 5 (default is 7, decrement twice)
+        XCTAssertTrue(drawButton.waitForExistence(timeout: 5), "Draw Roles button should exist")
         let stepper = app.steppers["setup-stepper"]
         XCTAssertTrue(stepper.waitForExistence(timeout: 5), "Player stepper should exist")
         stepper.buttons["Decrement"].tap()
-        sleep(1)
         stepper.buttons["Decrement"].tap()
-        sleep(1)
 
+        scrollTo(drawButton)
         drawButton.tap()
-        sleep(1)
+
+        handleDrunkSelectionIfNeeded()
 
         let assignButton = app.buttons["setup-assignRoles"]
-        XCTAssertTrue(assignButton.waitForExistence(timeout: 10), "Assign Roles button should exist")
-        // Wait for it to become enabled (drunk selection may be needed)
-        handleDrunkSelectionIfNeeded()
+        XCTAssertTrue(assignButton.waitForExistence(timeout: 5), "Assign Roles button should exist")
+        scrollTo(assignButton)
         assignButton.tap()
 
         // 3. Assignment — tap each card twice (flip open, flip closed/used)
         let nightFallsButton = app.buttons["assignment-nightFalls"]
-        XCTAssertTrue(nightFallsButton.waitForExistence(timeout: 10), "Night Falls button should exist")
+        XCTAssertTrue(nightFallsButton.waitForExistence(timeout: 5), "Night Falls button should exist")
 
-        for i in 0..<5 {
+        for i in 0..<playerCount {
             let card = app.buttons["assignment-card-\(i)"]
-            if card.waitForExistence(timeout: 5) {
+            if card.waitForExistence(timeout: 3) {
+                scrollTo(card)
                 card.tap()
-                sleep(1)
-                // Tap again to dismiss (flip back / mark used)
-                card.tap()
-                sleep(1)
+                // Wait for flip animation then tap again to dismiss
+                _ = card.waitForExistence(timeout: 2)
+                if card.exists && card.isHittable {
+                    card.tap()
+                    _ = card.waitForExistence(timeout: 2)
+                }
             }
         }
 
+        scrollTo(nightFallsButton)
         nightFallsButton.tap()
-        sleep(1)
 
         // 4. Handle Imp Bluff setup if it appears
         handleImpBluffSetupIfNeeded()
@@ -70,34 +72,31 @@ final class BloodOnTheClockTowerUITests: XCTestCase {
         // 6. Run night/day cycles until game over
         let maxCycles = 20
         for _ in 0..<maxCycles {
-            // Check if game is over
-            if app.staticTexts["gameover-winner"].waitForExistence(timeout: 2) {
+            if app.staticTexts["gameover-winner"].waitForExistence(timeout: 1) {
                 break
             }
 
-            // Night phase: complete/skip all steps
             driveNightPhase()
 
-            // Check if game ended during night
-            if app.staticTexts["gameover-winner"].waitForExistence(timeout: 2) {
+            if app.staticTexts["gameover-winner"].waitForExistence(timeout: 1) {
                 break
             }
 
-            // Day phase: nominate, vote, execute
             driveDayPhase()
         }
 
         // 7. Verify game over screen
         let winnerText = app.staticTexts["gameover-winner"]
-        XCTAssertTrue(winnerText.waitForExistence(timeout: 15), "Game over winner text should appear")
+        XCTAssertTrue(winnerText.waitForExistence(timeout: 10), "Game over winner text should appear")
 
         // 8. Restart and verify back at template selection
         let restartButton = app.buttons["gameover-restart"]
-        XCTAssertTrue(restartButton.exists, "Restart button should exist on game over screen")
+        XCTAssertTrue(restartButton.waitForExistence(timeout: 5), "Restart button should exist on game over screen")
+        scrollTo(restartButton)
         restartButton.tap()
 
         XCTAssertTrue(
-            app.buttons["template-trouble_brewing"].waitForExistence(timeout: 10),
+            app.buttons["template-trouble_brewing"].waitForExistence(timeout: 5),
             "Should return to template selection after restart"
         )
     }
@@ -107,63 +106,58 @@ final class BloodOnTheClockTowerUITests: XCTestCase {
     @MainActor
     func testLaunchAndSelectEachTemplate() throws {
         // Verify all 3 templates appear
-        XCTAssertTrue(app.buttons["template-trouble_brewing"].waitForExistence(timeout: 15))
+        XCTAssertTrue(app.buttons["template-trouble_brewing"].waitForExistence(timeout: 10))
         XCTAssertTrue(app.buttons["template-bad_moon_rising"].waitForExistence(timeout: 5))
         XCTAssertTrue(app.buttons["template-sects_and_violets"].waitForExistence(timeout: 5))
 
         // Select Trouble Brewing, verify player setup appears
         app.buttons["template-trouble_brewing"].tap()
-        XCTAssertTrue(app.buttons["setup-drawRoles"].waitForExistence(timeout: 10))
+        XCTAssertTrue(app.buttons["setup-drawRoles"].waitForExistence(timeout: 5))
 
         // Reset and select Bad Moon Rising
-        let restartButton = app.buttons["content-restart"]
-        XCTAssertTrue(restartButton.waitForExistence(timeout: 5))
-        restartButton.tap()
-
-        XCTAssertTrue(app.buttons["template-bad_moon_rising"].waitForExistence(timeout: 10))
+        tapRestartButton()
+        XCTAssertTrue(app.buttons["template-bad_moon_rising"].waitForExistence(timeout: 5))
         app.buttons["template-bad_moon_rising"].tap()
-        XCTAssertTrue(app.buttons["setup-drawRoles"].waitForExistence(timeout: 10))
+        XCTAssertTrue(app.buttons["setup-drawRoles"].waitForExistence(timeout: 5))
 
         // Reset and select Sects and Violets
-        restartButton.tap()
-        XCTAssertTrue(app.buttons["template-sects_and_violets"].waitForExistence(timeout: 10))
+        tapRestartButton()
+        XCTAssertTrue(app.buttons["template-sects_and_violets"].waitForExistence(timeout: 5))
         app.buttons["template-sects_and_violets"].tap()
-        XCTAssertTrue(app.buttons["setup-drawRoles"].waitForExistence(timeout: 10))
+        XCTAssertTrue(app.buttons["setup-drawRoles"].waitForExistence(timeout: 5))
     }
 
     // MARK: - Player Setup Adjustments
 
     @MainActor
     func testPlayerSetupAdjustments() throws {
-        // Select a template first
-        XCTAssertTrue(app.buttons["template-trouble_brewing"].waitForExistence(timeout: 15))
-        app.buttons["template-trouble_brewing"].tap()
+        let templateButton = app.buttons["template-trouble_brewing"]
+        XCTAssertTrue(templateButton.waitForExistence(timeout: 10))
+        templateButton.tap()
 
         let drawButton = app.buttons["setup-drawRoles"]
-        XCTAssertTrue(drawButton.waitForExistence(timeout: 10))
+        XCTAssertTrue(drawButton.waitForExistence(timeout: 5))
 
         // Draw roles at default count
+        scrollTo(drawButton)
         drawButton.tap()
-        sleep(1)
 
-        // Verify assign button becomes available (may need drunk selection)
         handleDrunkSelectionIfNeeded()
         let assignButton = app.buttons["setup-assignRoles"]
-        XCTAssertTrue(assignButton.waitForExistence(timeout: 10))
+        XCTAssertTrue(assignButton.waitForExistence(timeout: 5))
 
         // Adjust player count up
         let stepper = app.steppers["setup-stepper"]
-        XCTAssertTrue(stepper.waitForExistence(timeout: 5))
+        scrollTo(stepper)
         stepper.buttons["Increment"].tap()
-        sleep(1)
 
         // Draw again — new deck for new count
+        scrollTo(drawButton)
         drawButton.tap()
-        sleep(1)
 
         // Verify assign button still available
         handleDrunkSelectionIfNeeded()
-        XCTAssertTrue(assignButton.waitForExistence(timeout: 10))
+        XCTAssertTrue(assignButton.waitForExistence(timeout: 5))
     }
 
     // MARK: - Night/Day Drivers
@@ -172,133 +166,207 @@ final class BloodOnTheClockTowerUITests: XCTestCase {
         let completeButton = app.buttons["night-complete"]
         let skipButton = app.buttons["night-skip"]
 
-        // Process up to 20 night steps
         for _ in 0..<20 {
-            // Check if we've moved to day or game over
-            if app.buttons["day-execute"].exists || app.staticTexts["gameover-winner"].exists {
+            // Check if we've transitioned to day or game over
+            if app.buttons["day-execute"].exists || app.buttons["day-skip"].exists
+                || app.staticTexts["gameover-winner"].exists {
                 return
             }
 
-            // Handle fortune teller red herring if it appears mid-night
             handleFortuneTellerRedHerringIfNeeded()
-
-            // Handle imp replacement if needed
             handleImpReplacementIfNeeded()
 
-            if completeButton.exists && completeButton.isHittable {
-                // Try to select the first available night target
+            if completeButton.waitForExistence(timeout: 2) {
+                // Scroll to action area and try to select a target
+                scrollTo(completeButton)
                 selectFirstAvailableNightTarget()
-                completeButton.tap()
-                usleep(500_000)
-            } else if skipButton.exists && skipButton.isHittable {
-                skipButton.tap()
-                usleep(500_000)
-            } else {
-                // Night phase may be done — wait briefly for transition
-                sleep(1)
-                if !completeButton.exists && !skipButton.exists {
-                    return
+                scrollTo(completeButton)
+                if completeButton.isHittable {
+                    completeButton.tap()
+                    _ = completeButton.waitForExistence(timeout: 2)
+                    continue
                 }
             }
+
+            if skipButton.exists {
+                scrollTo(skipButton)
+                if skipButton.isHittable {
+                    skipButton.tap()
+                    _ = skipButton.waitForExistence(timeout: 2)
+                    continue
+                }
+            }
+
+            // Neither button is actionable — night may be done
+            if !completeButton.exists && !skipButton.exists {
+                return
+            }
+            // Buttons exist but aren't hittable yet — brief wait and retry
+            _ = completeButton.waitForExistence(timeout: 1)
         }
     }
 
     private func driveDayPhase() {
+        // Wait for day phase UI to appear
         let executeButton = app.buttons["day-execute"]
         let skipButton = app.buttons["day-skip"]
 
-        // Wait for day phase UI
-        guard executeButton.waitForExistence(timeout: 10) else { return }
+        guard executeButton.waitForExistence(timeout: 5) || skipButton.waitForExistence(timeout: 2) else { return }
 
-        // Try to nominate and vote
+        // Scroll down past the storyteller panel to reach the nomination section
+        app.swipeUp()
+
         // Pick the first available nominator
         if let nominatorButton = findFirstButton(prefix: "day-nominator-") {
+            scrollTo(nominatorButton)
             nominatorButton.tap()
-            usleep(500_000)
 
-            // Pick the first available nominee
+            // Wait for nominee list to appear, then pick one
+            _ = app.buttons["day-skip"].waitForExistence(timeout: 3)
             if let nomineeButton = findFirstButton(prefix: "day-nominee-") {
+                scrollTo(nomineeButton)
                 nomineeButton.tap()
-                usleep(500_000)
+
+                // Wait for vote buttons to appear
+                _ = app.buttons["day-lockVote"].waitForExistence(timeout: 3)
 
                 // Vote: tap all available vote buttons to get majority
-                for seat in 1...5 {
+                for seat in 1...playerCount {
                     let voteButton = app.buttons["day-vote-\(seat)"]
-                    if voteButton.exists && voteButton.isHittable {
-                        voteButton.tap()
-                        usleep(200_000)
+                    if voteButton.exists {
+                        scrollTo(voteButton)
+                        if voteButton.isHittable {
+                            voteButton.tap()
+                        }
                     }
                 }
 
                 // Lock the vote
                 let lockButton = app.buttons["day-lockVote"]
+                scrollTo(lockButton)
                 if lockButton.exists && lockButton.isHittable {
                     lockButton.tap()
-                    usleep(500_000)
+                    _ = executeButton.waitForExistence(timeout: 3)
                 }
             }
         }
 
-        // Execute if available, otherwise skip
+        // Execute if we have a valid nomination, otherwise skip the day
+        scrollTo(executeButton)
         if executeButton.exists && executeButton.isHittable && executeButton.isEnabled {
             executeButton.tap()
-        } else if skipButton.exists && skipButton.isHittable {
-            skipButton.tap()
+        } else {
+            scrollTo(skipButton)
+            if skipButton.exists && skipButton.isHittable {
+                skipButton.tap()
+            }
         }
-        sleep(1)
+
+        // Wait for transition to night or game over
+        _ = app.buttons["night-complete"].waitForExistence(timeout: 3)
     }
 
     // MARK: - Helpers
 
+    /// Scroll the view until an element is hittable.
+    private func scrollTo(_ element: XCUIElement, maxAttempts: Int = 5) {
+        guard element.exists else { return }
+        if element.isHittable { return }
+
+        for _ in 0..<maxAttempts {
+            app.swipeUp()
+            if element.isHittable { return }
+        }
+        // Element might be above — scroll back
+        for _ in 0..<(maxAttempts * 2) {
+            app.swipeDown()
+            if element.isHittable { return }
+        }
+    }
+
+    /// Tap the restart button, handling toolbar placement across iOS versions.
+    private func tapRestartButton() {
+        // Toolbar buttons may be found via app.buttons or navigationBars.buttons
+        let restart = app.buttons["content-restart"]
+        if restart.waitForExistence(timeout: 3) {
+            restart.tap()
+            return
+        }
+        let navRestart = app.navigationBars.buttons["content-restart"]
+        if navRestart.waitForExistence(timeout: 3) {
+            navRestart.tap()
+            return
+        }
+        // Fallback: find by label
+        for label in ["Restart", "重新开始"] {
+            let byLabel = app.navigationBars.buttons[label]
+            if byLabel.exists {
+                byLabel.tap()
+                return
+            }
+        }
+        XCTFail("Could not find restart button")
+    }
+
     private func handleDrunkSelectionIfNeeded() {
-        sleep(1)
+        // Wait for UI to settle after drawing
+        _ = app.buttons["setup-assignRoles"].waitForExistence(timeout: 3)
+        // If drunk choice buttons exist, tap the first one
+        if let drunkChoice = findFirstButton(prefix: "setup-drunkChoice-") {
+            scrollTo(drunkChoice)
+            drunkChoice.tap()
+            _ = app.buttons["setup-assignRoles"].waitForExistence(timeout: 2)
+        }
     }
 
     private func handleImpBluffSetupIfNeeded() {
         let showToImpButton = app.buttons["impbluff-showToImp"]
-        guard showToImpButton.waitForExistence(timeout: 5) else { return }
+        guard showToImpButton.waitForExistence(timeout: 3) else { return }
 
         // Select the first 3 available bluff roles
         var selected = 0
         for button in app.buttons.allElementsBoundByIndex where button.identifier.hasPrefix("impbluff-role-") {
             if selected >= 3 { break }
+            scrollTo(button)
             button.tap()
             selected += 1
-            usleep(300_000)
         }
 
+        scrollTo(showToImpButton)
         showToImpButton.tap()
-        sleep(1)
 
         // Handle the reveal view
         let revealNightFalls = app.buttons["impbluffreveal-nightFalls"]
-        if revealNightFalls.waitForExistence(timeout: 5) {
+        if revealNightFalls.waitForExistence(timeout: 3) {
             revealNightFalls.tap()
-            sleep(1)
         }
     }
 
     private func handleFortuneTellerRedHerringIfNeeded() {
         if let redHerringButton = findFirstButton(prefix: "night-redherring-") {
+            scrollTo(redHerringButton)
             redHerringButton.tap()
-            usleep(500_000)
+            _ = app.buttons["night-complete"].waitForExistence(timeout: 3)
         }
     }
 
     private func handleImpReplacementIfNeeded() {
         if let replacementButton = findFirstButton(prefix: "night-impReplacement-") {
+            scrollTo(replacementButton)
             replacementButton.tap()
-            usleep(500_000)
+            _ = app.buttons["night-complete"].waitForExistence(timeout: 3)
         }
     }
 
     private func selectFirstAvailableNightTarget() {
-        for seat in 1...5 {
+        for seat in 1...playerCount {
             let targetButton = app.buttons["night-target-\(seat)"]
-            if targetButton.exists && targetButton.isHittable {
-                targetButton.tap()
-                usleep(300_000)
-                return
+            if targetButton.exists {
+                scrollTo(targetButton)
+                if targetButton.isHittable {
+                    targetButton.tap()
+                    return
+                }
             }
         }
     }
