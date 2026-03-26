@@ -173,11 +173,10 @@ struct PlayerRowView: View {
 
     private func poisonedStatusIcon(font: Font, size: CGFloat) -> some View {
         Image("poisoned_status")
-            .renderingMode(.template)
+            .renderingMode(.original)
             .resizable()
             .scaledToFit()
             .frame(width: size, height: size)
-            .foregroundStyle(Color(red: 0.3, green: 0.0, blue: 0.4))
             .accessibilityHidden(true)
             .font(font)
     }

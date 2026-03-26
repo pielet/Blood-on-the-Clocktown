@@ -2,6 +2,7 @@ import SwiftUI
 
 struct AssignmentView: View {
     @EnvironmentObject private var game: ClocktowerGameViewModel
+    @Environment(\.colorScheme) private var colorScheme
 
     private let activeCardBackAsset = "card_back_active_flat"
     private let inactiveCardBackAsset = "card_back_inactive_flat"
@@ -107,7 +108,7 @@ struct AssignmentView: View {
             RoundedRectangle(cornerRadius: 12)
                 .fill(
                     LinearGradient(
-                        colors: [Color.white, Color(red: 0.92, green: 0.95, blue: 0.98)],
+                        colors: assignmentCardFrontGradientColors,
                         startPoint: .topLeading,
                         endPoint: .bottomTrailing
                     )
@@ -115,9 +116,9 @@ struct AssignmentView: View {
         )
         .overlay(
             RoundedRectangle(cornerRadius: 12)
-                .stroke(Color.black.opacity(0.08), lineWidth: 1)
+                .stroke(assignmentCardFrontBorderColor, lineWidth: 1)
         )
-        .shadow(color: Color.black.opacity(0.08), radius: 8, y: 4)
+        .shadow(color: assignmentCardFrontShadowColor, radius: 8, y: 4)
     }
 
     private func assignmentCardBack(isUsed: Bool) -> some View {
@@ -134,6 +135,36 @@ struct AssignmentView: View {
                 .stroke(isUsed ? Color.black.opacity(0.18) : Color.white.opacity(0.16), lineWidth: 1)
         )
         .shadow(color: Color.black.opacity(isUsed ? 0.08 : 0.16), radius: 8, y: 4)
+    }
+
+    private var assignmentCardFrontGradientColors: [Color] {
+        if colorScheme == .dark {
+            return [
+                Color(uiColor: .secondarySystemBackground),
+                Color(uiColor: .tertiarySystemBackground)
+            ]
+        }
+
+        return [
+            Color(uiColor: .systemBackground),
+            Color(red: 0.92, green: 0.95, blue: 0.98)
+        ]
+    }
+
+    private var assignmentCardFrontBorderColor: Color {
+        if colorScheme == .dark {
+            return Color.white.opacity(0.12)
+        }
+
+        return Color.black.opacity(0.08)
+    }
+
+    private var assignmentCardFrontShadowColor: Color {
+        if colorScheme == .dark {
+            return Color.black.opacity(0.28)
+        }
+
+        return Color.black.opacity(0.08)
     }
 }
 

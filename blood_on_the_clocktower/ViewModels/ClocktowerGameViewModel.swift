@@ -252,9 +252,9 @@ final class ClocktowerGameViewModel: ObservableObject {
         case .transfer:
             return Color(red: 0.2, green: 0.4, blue: 0.8)
         case .poison:
-            return Color(red: 0.3, green: 0.0, blue: 0.4)
+            return Color(uiColor: .systemPurple)
         case .drunk:
-            return .orange
+            return Color(uiColor: .systemOrange)
         case .noAction:
             return .gray
         case .kill:
@@ -5023,7 +5023,7 @@ final class ClocktowerGameViewModel: ObservableObject {
         guard let roleId = player.roleId, let role = roleTemplate(for: roleId) else { return .gray }
         switch role.team {
         case .townsfolk: return .blue
-        case .outsider: return .orange
+        case .outsider: return Color(uiColor: .systemOrange)
         case .minion: return .red
         case .demon: return Color.red.opacity(0.7)
         case .traveller: return .gray

@@ -9,6 +9,9 @@ struct PlayerSetupView: View {
     private let drunkChoiceColumns = [
         GridItem(.adaptive(minimum: 140, maximum: 220), spacing: 10)
     ]
+    private let outsiderAccent = Color(uiColor: .systemOrange)
+    private let setupPanelFill = Color(uiColor: .secondarySystemBackground)
+    private let setupBorder = Color(uiColor: .separator).opacity(0.45)
 
     var body: some View {
         ScrollView {
@@ -108,8 +111,8 @@ struct PlayerSetupView: View {
             fill = Color.blue.opacity(0.14)
             stroke = Color.blue.opacity(0.35)
         case .outsider:
-            fill = Color.orange.opacity(0.16)
-            stroke = Color.orange.opacity(0.42)
+            fill = outsiderAccent.opacity(0.18)
+            stroke = outsiderAccent.opacity(0.6)
         case .minion:
             fill = Color.red.opacity(0.14)
             stroke = Color.red.opacity(0.35)
@@ -172,7 +175,11 @@ struct PlayerSetupView: View {
                 .padding(12)
                 .background(
                     RoundedRectangle(cornerRadius: 12)
-                        .fill(Color.gray.opacity(0.08))
+                        .fill(setupPanelFill)
+                )
+                .overlay(
+                    RoundedRectangle(cornerRadius: 12)
+                        .stroke(setupBorder, lineWidth: 1)
                 )
             }
         }
@@ -187,18 +194,18 @@ struct PlayerSetupView: View {
                     .frame(width: 22, height: 22)
                 Text(game.localizedRoleName(role))
                     .font(.caption.weight(.semibold))
-                    .foregroundStyle(isSelected ? .white : .primary)
+                    .foregroundStyle(isSelected ? outsiderAccent : .primary)
                     .frame(maxWidth: .infinity, alignment: .leading)
             }
             .padding(.horizontal, 10)
             .padding(.vertical, 10)
             .background(
                 RoundedRectangle(cornerRadius: 10)
-                    .fill(isSelected ? Color.blue : Color.white.opacity(0.96))
+                    .fill(isSelected ? outsiderAccent.opacity(0.2) : setupPanelFill)
             )
             .overlay(
                 RoundedRectangle(cornerRadius: 10)
-                    .stroke(isSelected ? Color.blue : Color.black.opacity(0.08), lineWidth: 1)
+                    .stroke(isSelected ? outsiderAccent.opacity(0.7) : setupBorder, lineWidth: 1)
             )
         }
         .buttonStyle(.plain)
