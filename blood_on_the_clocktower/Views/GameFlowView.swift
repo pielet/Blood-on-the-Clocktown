@@ -721,8 +721,6 @@ struct GameFlowView: View {
                 if game.isSelectingFortuneTellerRedHerring {
                     fortuneTellerRedHerringPanel
                 } else {
-                    nightReminderCard
-
                     if !game.currentNightSteps.isEmpty {
                         wakeProgressChart
                     }
@@ -742,14 +740,6 @@ struct GameFlowView: View {
                 }
             }
         }
-    }
-
-    private var nightReminderCard: some View {
-        return Text(game.nightStepReminder)
-            .font(.caption)
-            .foregroundStyle(.secondary)
-            .frame(maxWidth: .infinity, alignment: .leading)
-            .fixedSize(horizontal: false, vertical: true)
     }
 
     private var fortuneTellerRedHerringPanel: some View {
@@ -1109,12 +1099,14 @@ struct GameFlowView: View {
         case nil:
             .blue
         }
+        let pendingFill = Color(uiColor: .secondarySystemBackground)
+        let pendingStroke = Color(uiColor: .separator).opacity(0.55)
         let fill: Color = isCurrent
             ? currentAccent.opacity(0.2)
-            : (isSkipped ? .gray.opacity(0.12) : (isCompleted ? .green.opacity(0.16) : Color(.secondarySystemBackground)))
+            : (isSkipped ? .gray.opacity(0.12) : (isCompleted ? .green.opacity(0.16) : pendingFill))
         let stroke: Color = isCurrent
             ? currentAccent.opacity(0.72)
-            : (isSkipped ? .gray.opacity(0.35) : (isCompleted ? .green.opacity(0.45) : .black.opacity(0.08)))
+            : (isSkipped ? .gray.opacity(0.35) : (isCompleted ? .green.opacity(0.45) : pendingStroke))
         let indexColor: Color = isCurrent ? currentAccent.opacity(0.95) : .secondary
 
         return VStack(alignment: .leading, spacing: 4) {

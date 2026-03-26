@@ -47,11 +47,11 @@ struct ImpBluffRevealView: View {
                 .padding(14)
                 .background(
                     RoundedRectangle(cornerRadius: 14)
-                        .fill(Color.gray.opacity(0.08))
+                        .fill(ImpBluffRoleTagStyle.cardFill)
                 )
                 .overlay(
                     RoundedRectangle(cornerRadius: 14)
-                        .stroke(Color.black.opacity(0.08), lineWidth: 1)
+                        .stroke(ImpBluffRoleTagStyle.cardBorder, lineWidth: 1)
                 )
             }
         }

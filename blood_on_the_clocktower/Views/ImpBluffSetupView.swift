@@ -1,5 +1,12 @@
 import SwiftUI
 
+enum ImpBluffRoleTagStyle {
+    static let cardFill = Color(uiColor: .secondarySystemBackground)
+    static let cardBorder = Color(uiColor: .separator).opacity(0.55)
+    static let selectedFill = Color(uiColor: .systemBlue).opacity(0.18)
+    static let selectedBorder = Color(uiColor: .systemBlue).opacity(0.82)
+}
+
 struct ImpBluffSetupView: View {
     @EnvironmentObject private var game: ClocktowerGameViewModel
 
@@ -69,11 +76,11 @@ struct ImpBluffSetupView: View {
             .padding(10)
             .background(
                 RoundedRectangle(cornerRadius: 12)
-                    .fill(isSelected ? Color.green.opacity(0.18) : Color.gray.opacity(0.08))
+                    .fill(isSelected ? ImpBluffRoleTagStyle.selectedFill : ImpBluffRoleTagStyle.cardFill)
             )
             .overlay(
                 RoundedRectangle(cornerRadius: 12)
-                    .stroke(isSelected ? Color.green.opacity(0.8) : Color.black.opacity(0.08), lineWidth: 1)
+                    .stroke(isSelected ? ImpBluffRoleTagStyle.selectedBorder : ImpBluffRoleTagStyle.cardBorder, lineWidth: 1)
             )
         }
         .buttonStyle(.plain)

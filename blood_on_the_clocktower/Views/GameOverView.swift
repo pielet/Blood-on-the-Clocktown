@@ -24,35 +24,27 @@ struct GameOverView: View {
     }
 
     private var finalRolesPanel: some View {
-        GroupBox(game.ui("Final Roles", "最终角色")) {
+        GroupBox {
             VStack(alignment: .leading, spacing: 8) {
                 ForEach(game.players) { player in
                     playerRoleHistory(player: player)
                 }
             }
         }
+        .frame(maxWidth: .infinity, alignment: .leading)
     }
 
     private func playerRoleHistory(player: PlayerCard) -> some View {
-        HStack(alignment: .top, spacing: 12) {
-            VStack(alignment: .leading, spacing: 4) {
-                Text(player.name)
-                    .font(.subheadline.weight(.semibold))
+        HStack(alignment: .center, spacing: 12) {
+            Text(player.name)
+                .font(.body.weight(.semibold))
+                .lineLimit(1)
 
-                if let baseRole = baseRole(for: player) {
-                    roleBadge(baseRole, isCurrent: player.roleId == baseRole.id)
-                }
-            }
+            Spacer(minLength: 12)
 
-            Spacer(minLength: 8)
-
-            if let currentRole = transferredRole(for: player) {
-                HStack(spacing: 6) {
-                    Image(systemName: "arrow.right")
-                        .font(.caption2)
-                        .foregroundStyle(.secondary)
-                    roleBadge(currentRole, isCurrent: true)
-                }
+            if let baseRole = baseRole(for: player) {
+                roleTransition(baseRole: baseRole, currentRole: transferredRole(for: player), isBaseCurrent: player.roleId == baseRole.id)
+                    .frame(maxWidth: .infinity, alignment: .trailing)
             }
         }
         .padding(.vertical, 4)
@@ -82,12 +74,25 @@ struct GameOverView: View {
         return game.roleTemplate(for: currentRoleId)
     }
 
+    private func roleTransition(baseRole: RoleTemplate, currentRole: RoleTemplate?, isBaseCurrent: Bool) -> some View {
+        HStack(spacing: 6) {
+            roleBadge(baseRole, isCurrent: isBaseCurrent)
+
+            if let currentRole {
+                Image(systemName: "arrow.right")
+                    .font(.caption2)
+                    .foregroundStyle(.secondary)
+                roleBadge(currentRole, isCurrent: true)
+            }
+        }
+    }
+
     private func roleBadge(_ role: RoleTemplate, isCurrent: Bool) -> some View {
         HStack(spacing: 6) {
             RoleIconImage(role: role)
-                .frame(width: 20, height: 20)
+                .frame(width: 22, height: 22)
             Text(game.localizedRoleName(role))
-                .font(.caption)
+                .font(.footnote)
                 .foregroundStyle(isCurrent ? .primary : .secondary)
                 .lineLimit(1)
         }
