@@ -431,16 +431,27 @@ import Testing
             templateId: "trouble-brewing",
             roleIds: ["poisoner", "empath", "washerwoman", "imp", "baron"]
         )
+        game.appLanguage = .english
         let empath = game.players[1]
 
-        // Poisoner targets Empath
-        runNightStep(game, roleId: "poisoner", targets: [empath.id])
-
-        // Now Empath acts while poisoned — should log "poisoned"
         game.phase = .night
         game.isFirstNightPhase = false
-        game.currentNightSteps = [NightStepTemplate(id: "test-empath", roleId: "empath", condition: .always)]
+        game.currentNightSteps = [
+            NightStepTemplate(id: "test-poisoner", roleId: "poisoner", condition: .always),
+            NightStepTemplate(id: "test-empath", roleId: "empath", condition: .always)
+        ]
         game.currentNightStepIndex = 0
+
+        game.currentNightTargets = [empath.id]
+        game.completeCurrentNightAction()
+
+        #expect(game.currentNightStep?.roleId == "empath")
+        #expect(game.currentNightActor?.id == empath.id)
+        #expect(game.currentNightReminderHighlightStyle == .poison)
+        #expect(game.currentNightReminderHighlightStyle != nil)
+        #expect(game.nightStepReminder.contains("is poisoned"))
+        #expect(game.nightStepReminder.contains("false info"))
+
         game.completeCurrentNightAction()
 
         // Poisoned info roles still run but their game log entries are marked as poison-caused false info
@@ -451,6 +462,60 @@ import Testing
             return false
         }
         #expect(!poisonLogs.isEmpty, "Poisoned Empath should produce poison-colored log entries")
+    }
+
+    @Test func poisonedActiveRoleStillWakesInNightFlow() {
+        let game = makeAssignedGame(
+            templateId: "trouble-brewing",
+            roleIds: ["poisoner", "monk", "washerwoman", "imp", "baron"]
+        )
+        let monk = game.players[1]
+        let attemptedTarget = game.players[2]
+
+        game.phase = .night
+        game.isFirstNightPhase = false
+        game.currentNightSteps = [
+            NightStepTemplate(id: "test-poisoner", roleId: "poisoner", condition: .always),
+            NightStepTemplate(id: "test-monk", roleId: "monk", condition: .always)
+        ]
+        game.currentNightStepIndex = 0
+
+        game.currentNightTargets = [monk.id]
+        game.completeCurrentNightAction()
+
+        #expect(game.currentNightStep?.roleId == "monk")
+        #expect(game.currentNightActor?.id == monk.id)
+
+        game.currentNightTargets = [attemptedTarget.id]
+        game.completeCurrentNightAction()
+
+        #expect(game.players[2].protectedTonight == false)
+
+        let poisonLogs = game.gameLog.filter {
+            if case .poison = $0.logTone {
+                return true
+            }
+            return false
+        }
+        #expect(!poisonLogs.isEmpty, "Poisoned Monk should still wake and log a poison-colored no-effect result")
+    }
+
+    @Test func displayedDrunkWakeStepHighlightsReminderBlock() {
+        let game = makeAssignedGame(
+            templateId: "trouble-brewing",
+            roleIds: ["drunk", "washerwoman", "poisoner", "imp", "baron"]
+        )
+        game.appLanguage = .english
+        game.players[0].displayedRoleId = "chef"
+        game.phase = .firstNight
+        game.isFirstNightPhase = true
+        game.currentNightSteps = [NightStepTemplate(id: "test-chef", roleId: "chef", condition: .always)]
+        game.currentNightStepIndex = 0
+
+        #expect(game.currentNightActor?.id == game.players[0].id)
+        #expect(game.currentNightReminderHighlightStyle == .drunk)
+        #expect(game.currentNightReminderHighlightStyle != nil)
+        #expect(game.nightStepReminder.contains("actually the Drunk"))
     }
 
     // MARK: - Imp

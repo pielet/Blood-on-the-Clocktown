@@ -712,10 +712,7 @@ struct GameFlowView: View {
                 if game.isSelectingFortuneTellerRedHerring {
                     fortuneTellerRedHerringPanel
                 } else {
-                    Text(game.nightStepReminder)
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-                        .fixedSize(horizontal: false, vertical: true)
+                    nightReminderCard
 
                     if !game.currentNightSteps.isEmpty {
                         wakeProgressChart
@@ -737,6 +734,14 @@ struct GameFlowView: View {
                 }
             }
         }
+    }
+
+    private var nightReminderCard: some View {
+        return Text(game.nightStepReminder)
+            .font(.caption)
+            .foregroundStyle(.secondary)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .fixedSize(horizontal: false, vertical: true)
     }
 
     private var fortuneTellerRedHerringPanel: some View {
@@ -1088,17 +1093,26 @@ struct GameFlowView: View {
         let isSkipped = game.skippedNightStepIndices.contains(index)
         let role = game.roleTemplate(for: step.roleId)
         let playerName = game.wakeProgressPlayer(for: step)?.name ?? game.ui("Out", "未上场")
+        let currentAccent: Color = switch game.currentNightReminderHighlightStyle {
+        case .poison:
+            Color(uiColor: .systemPurple)
+        case .drunk:
+            Color(uiColor: .systemOrange)
+        case nil:
+            .blue
+        }
         let fill: Color = isCurrent
-            ? .blue.opacity(0.18)
+            ? currentAccent.opacity(0.2)
             : (isSkipped ? .gray.opacity(0.12) : (isCompleted ? .green.opacity(0.16) : Color(.secondarySystemBackground)))
         let stroke: Color = isCurrent
-            ? .blue.opacity(0.65)
+            ? currentAccent.opacity(0.72)
             : (isSkipped ? .gray.opacity(0.35) : (isCompleted ? .green.opacity(0.45) : .black.opacity(0.08)))
+        let indexColor: Color = isCurrent ? currentAccent.opacity(0.95) : .secondary
 
         return VStack(alignment: .leading, spacing: 4) {
             Text("\(index + 1)")
                 .font(.caption2.weight(.bold))
-                .foregroundStyle(isCurrent ? .blue : .secondary)
+                .foregroundStyle(indexColor)
             Text(playerName)
                 .font(.system(size: 10, weight: .semibold))
                 .lineLimit(1)

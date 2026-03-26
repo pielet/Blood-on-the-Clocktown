@@ -910,6 +910,45 @@ final class ClocktowerGameViewModel: ObservableObject {
         )
     }
 
+    private func currentNightSuppressionGuidance(roleId: String) -> String? {
+        guard let actor = currentNightActor,
+              !isDisplayedDrunk(actor, actingAs: roleId),
+              isPlayerExternallyPoisonedOrDrunk(actor) else {
+            return nil
+        }
+
+        let role = roleTemplate(for: roleId)
+        let engName = role?.name ?? roleId
+        let chnName = role?.chineseName ?? roleId
+        if playerIsPoisoned(actor) {
+            return ui(
+                "\(actor.name) is poisoned. Give false info, or no real effect.",
+                "\(actor.name) 已中毒。给出错误信息；若无信息能力，则不产生真实效果。"
+            )
+        }
+
+        return ui(
+            "\(actor.name) is drunk. Wake them and let them use \(engName), but give false information. If the ability has no information, accept the choice but apply no real effect.",
+            "\(actor.name) 当前醉酒。请照常按 \(chnName) 唤醒并让其使用能力，但要给出错误信息；若该能力没有信息，则照常记录选择，但不要产生真实效果。"
+        )
+    }
+
+    enum NightReminderHighlightStyle: Equatable {
+        case poison
+        case drunk
+    }
+
+    private func currentNightReminderHighlightStyle(for roleId: String) -> NightReminderHighlightStyle? {
+        guard let actor = currentNightActor else { return nil }
+        if playerIsPoisoned(actor) {
+            return .poison
+        }
+        if isDisplayedDrunk(actor, actingAs: roleId) || isPlayerExternallyPoisonedOrDrunk(actor) {
+            return .drunk
+        }
+        return nil
+    }
+
     private func actingDayPlayer(for roleId: String, requireUnsuppressed: Bool = true) -> PlayerCard? {
         actingPlayer(for: roleId, requireAlive: true, requireUnsuppressed: requireUnsuppressed)
     }
@@ -1862,9 +1901,8 @@ final class ClocktowerGameViewModel: ObservableObject {
             if item.roleId == "summoner" {
                 return currentDayNumber >= 2
             }
-            if isAbilitySuppressed(actor) && !isDisplayedDrunk(actor, actingAs: item.roleId) {
-                return false
-            }
+            // Suppressed players still wake so the Storyteller can provide false info
+            // or accept targets for an ability that ultimately has no effect.
             if item.roleId == "bountyhunter" {
                 if isFirstNightPhase {
                     return true
@@ -1952,6 +1990,11 @@ final class ClocktowerGameViewModel: ObservableObject {
     var currentNightActor: PlayerCard? {
         guard let step = currentNightStep else { return nil }
         return player(for: step.roleId)
+    }
+
+    var currentNightReminderHighlightStyle: NightReminderHighlightStyle? {
+        guard let step = currentNightStep else { return nil }
+        return currentNightReminderHighlightStyle(for: step.roleId)
     }
 
     func currentNightTargetLimit() -> Int {
@@ -4613,25 +4656,23 @@ final class ClocktowerGameViewModel: ObservableObject {
     }
 
     func isPlayerExternallyPoisonedOrDrunk(_ player: PlayerCard) -> Bool {
-        player.roleId != "drunk" && playerIsPoisonedOrDrunk(player)
+        playerIsPoisoned(player) || playerIsExternallyDrunk(player)
     }
 
     private func playerIsPoisonedOrDrunk(_ player: PlayerCard) -> Bool {
-        if player.roleId == "drunk" {
-            return true
-        }
+        if player.roleId == "drunk" { return true }
+        if playerIsPoisoned(player) { return true }
+        if playerIsExternallyDrunk(player) { return true }
+        return false
+    }
+
+    private func playerIsPoisoned(_ player: PlayerCard) -> Bool {
         if player.poisonedTonight {
             return true
         }
         if let poisonerPoisonedPlayerId,
            poisonerPoisonedPlayerId == player.id,
            players.contains(where: { $0.alive && $0.roleId == "poisoner" }) {
-            return true
-        }
-        if let minstrelDrunkUntilDayNumber,
-           currentDayNumber <= minstrelDrunkUntilDayNumber,
-           player.roleId != "minstrel",
-           isPlayerGood(player) {
             return true
         }
         if let widowPoisonedPlayerId,
@@ -4649,19 +4690,6 @@ final class ClocktowerGameViewModel: ObservableObject {
            players.contains(where: { $0.alive && $0.roleId == "pukka" }) {
             return true
         }
-        if let sweetheartDrunkPlayerId,
-           sweetheartDrunkPlayerId == player.id {
-            return true
-        }
-        if let untilDayNumber = temporaryDrunkPlayerUntilDayNumbers[player.id],
-           untilDayNumber >= currentDayNumber {
-            return true
-        }
-        if let roleId = player.roleId,
-           let untilDayNumber = temporaryDrunkRoleUntilDayNumbers[roleId],
-           untilDayNumber >= currentDayNumber {
-            return true
-        }
         if noDashiiPoisonedPlayerIds.contains(player.id),
            players.contains(where: { $0.alive && $0.roleId == "no-dashii" }) {
             return true
@@ -4674,6 +4702,29 @@ final class ClocktowerGameViewModel: ObservableObject {
            currentDayNumber <= xaanPoisonedUntilDayNumber,
            roleTemplate(for: player.roleId ?? "")?.team == .townsfolk,
            players.contains(where: { $0.alive && $0.roleId == "xaan" }) {
+            return true
+        }
+        return false
+    }
+
+    private func playerIsExternallyDrunk(_ player: PlayerCard) -> Bool {
+        if let minstrelDrunkUntilDayNumber,
+           currentDayNumber <= minstrelDrunkUntilDayNumber,
+           player.roleId != "minstrel",
+           isPlayerGood(player) {
+            return true
+        }
+        if let sweetheartDrunkPlayerId,
+           sweetheartDrunkPlayerId == player.id {
+            return true
+        }
+        if let untilDayNumber = temporaryDrunkPlayerUntilDayNumbers[player.id],
+           untilDayNumber >= currentDayNumber {
+            return true
+        }
+        if let roleId = player.roleId,
+           let untilDayNumber = temporaryDrunkRoleUntilDayNumbers[roleId],
+           untilDayNumber >= currentDayNumber {
             return true
         }
         return false
@@ -5900,6 +5951,9 @@ final class ClocktowerGameViewModel: ObservableObject {
             "本夜请唤起：\(actor.name) 的 \(role.chineseName)\n\(abilityText)"
         )
         if let guidance = currentNightDrunkGuidance(roleId: step.roleId) {
+            return "\(base)\n\n\(guidance)"
+        }
+        if let guidance = currentNightSuppressionGuidance(roleId: step.roleId) {
             return "\(base)\n\n\(guidance)"
         }
         return base

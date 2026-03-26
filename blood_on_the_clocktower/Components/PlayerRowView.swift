@@ -70,7 +70,7 @@ struct PlayerRowView: View {
                     }
 
                     if game.isPlayerExternallyPoisonedOrDrunk(player) {
-                        poisonedStatusIcon(font: .caption2, size: 12)
+                        poisonedStatusIcon(font: .caption.weight(.semibold), size: 24)
                     }
                 }
 
@@ -129,7 +129,7 @@ struct PlayerRowView: View {
                     ForEach(statusItems, id: \.self) { item in
                         HStack(spacing: 4) {
                             if item.contains("Poisoned") || item.contains("中毒") {
-                                poisonedStatusIcon(font: .caption2, size: 12)
+                                poisonedStatusIcon(font: .caption2, size: 20)
                             }
                             Text(item)
                                 .font(.caption2)
