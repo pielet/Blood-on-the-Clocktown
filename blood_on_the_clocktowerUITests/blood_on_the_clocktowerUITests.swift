@@ -20,7 +20,7 @@ final class BloodOnTheClockTowerUITests: XCTestCase {
     @MainActor
     func testFullTroubleBrewingGame() throws {
         // 1. Select Trouble Brewing template
-        let templateButton = app.buttons["template-trouble_brewing"]
+        let templateButton = app.buttons["template-trouble-brewing"]
         XCTAssertTrue(templateButton.waitForExistence(timeout: 10), "Trouble Brewing template button should exist")
         templateButton.tap()
 
@@ -29,8 +29,8 @@ final class BloodOnTheClockTowerUITests: XCTestCase {
         XCTAssertTrue(drawButton.waitForExistence(timeout: 5), "Draw Roles button should exist")
         let stepper = app.steppers["setup-stepper"]
         XCTAssertTrue(stepper.waitForExistence(timeout: 5), "Player stepper should exist")
-        stepper.buttons["Decrement"].tap()
-        stepper.buttons["Decrement"].tap()
+        stepperButton(in: stepper, direction: "Decrement").tap()
+        stepperButton(in: stepper, direction: "Decrement").tap()
 
         scrollTo(drawButton)
         drawButton.tap()
@@ -96,7 +96,7 @@ final class BloodOnTheClockTowerUITests: XCTestCase {
         restartButton.tap()
 
         XCTAssertTrue(
-            app.buttons["template-trouble_brewing"].waitForExistence(timeout: 5),
+            app.buttons["template-trouble-brewing"].waitForExistence(timeout: 5),
             "Should return to template selection after restart"
         )
     }
@@ -106,24 +106,24 @@ final class BloodOnTheClockTowerUITests: XCTestCase {
     @MainActor
     func testLaunchAndSelectEachTemplate() throws {
         // Verify all 3 templates appear
-        XCTAssertTrue(app.buttons["template-trouble_brewing"].waitForExistence(timeout: 10))
-        XCTAssertTrue(app.buttons["template-bad_moon_rising"].waitForExistence(timeout: 5))
-        XCTAssertTrue(app.buttons["template-sects_and_violets"].waitForExistence(timeout: 5))
+        XCTAssertTrue(app.buttons["template-trouble-brewing"].waitForExistence(timeout: 10))
+        XCTAssertTrue(app.buttons["template-bad-moon-rising"].waitForExistence(timeout: 5))
+        XCTAssertTrue(app.buttons["template-sects-and-violets"].waitForExistence(timeout: 5))
 
         // Select Trouble Brewing, verify player setup appears
-        app.buttons["template-trouble_brewing"].tap()
+        app.buttons["template-trouble-brewing"].tap()
         XCTAssertTrue(app.buttons["setup-drawRoles"].waitForExistence(timeout: 5))
 
         // Reset and select Bad Moon Rising
         tapRestartButton()
-        XCTAssertTrue(app.buttons["template-bad_moon_rising"].waitForExistence(timeout: 5))
-        app.buttons["template-bad_moon_rising"].tap()
+        XCTAssertTrue(app.buttons["template-bad-moon-rising"].waitForExistence(timeout: 5))
+        app.buttons["template-bad-moon-rising"].tap()
         XCTAssertTrue(app.buttons["setup-drawRoles"].waitForExistence(timeout: 5))
 
         // Reset and select Sects and Violets
         tapRestartButton()
-        XCTAssertTrue(app.buttons["template-sects_and_violets"].waitForExistence(timeout: 5))
-        app.buttons["template-sects_and_violets"].tap()
+        XCTAssertTrue(app.buttons["template-sects-and-violets"].waitForExistence(timeout: 5))
+        app.buttons["template-sects-and-violets"].tap()
         XCTAssertTrue(app.buttons["setup-drawRoles"].waitForExistence(timeout: 5))
     }
 
@@ -131,7 +131,7 @@ final class BloodOnTheClockTowerUITests: XCTestCase {
 
     @MainActor
     func testPlayerSetupAdjustments() throws {
-        let templateButton = app.buttons["template-trouble_brewing"]
+        let templateButton = app.buttons["template-trouble-brewing"]
         XCTAssertTrue(templateButton.waitForExistence(timeout: 10))
         templateButton.tap()
 
@@ -149,7 +149,7 @@ final class BloodOnTheClockTowerUITests: XCTestCase {
         // Adjust player count up
         let stepper = app.steppers["setup-stepper"]
         scrollTo(stepper)
-        stepper.buttons["Increment"].tap()
+        stepperButton(in: stepper, direction: "Increment").tap()
 
         // Draw again — new deck for new count
         scrollTo(drawButton)
@@ -356,6 +356,14 @@ final class BloodOnTheClockTowerUITests: XCTestCase {
             replacementButton.tap()
             _ = app.buttons["night-complete"].waitForExistence(timeout: 3)
         }
+    }
+
+    private func stepperButton(in stepper: XCUIElement, direction: String) -> XCUIElement {
+        let prefixed = stepper.buttons["setup-stepper-\(direction)"]
+        if prefixed.exists {
+            return prefixed
+        }
+        return stepper.buttons[direction]
     }
 
     private func selectFirstAvailableNightTarget() {

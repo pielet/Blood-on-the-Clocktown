@@ -202,6 +202,7 @@ struct PlayerSetupView: View {
             )
         }
         .buttonStyle(.plain)
+        .accessibilityIdentifier("setup-drunkChoice-\(role.id)")
     }
 
     private func dayTimerLabel(for seconds: Int) -> String {
