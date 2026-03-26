@@ -141,13 +141,53 @@ import Testing
         game.currentNightSteps = [NightStepTemplate(id: "test-librarian", roleId: "librarian", condition: .always)]
         game.currentNightStepIndex = 0
 
-        // Full pool minus excluded roles (librarian is townsfolk so not filtered; drunk is excluded)
-        let excluded: Set<String> = ["librarian", "drunk", "marionette"]
+        // Full outsider pool except marionette, which is never a valid TB registration result.
+        let excluded: Set<String> = ["marionette"]
         let expectedOutsiders = Set(troubleBrewingTemplate.roles.filter { $0.team == .outsider && !excluded.contains($0.id) }.map(\.id))
         let choices = game.currentNightRoleChoices()
         let choiceRoleIds = Set(choices.compactMap(\.roleId))
         #expect(choiceRoleIds == expectedOutsiders)
         #expect(choices.contains(where: { $0.roleId == nil }), "Should include 'No Outsider' option")
+    }
+
+    @Test func librarianSelectingDrunkTargetsActualDrunkWhenInPlay() throws {
+        let game = makeAssignedGame(
+            templateId: "trouble-brewing",
+            roleIds: ["librarian", "drunk", "chef", "spy", "imp"]
+        )
+        game.appLanguage = .english
+        game.phase = .firstNight
+        game.isFirstNightPhase = true
+        game.currentNightSteps = [NightStepTemplate(id: "test-librarian", roleId: "librarian", condition: .always)]
+        game.currentNightStepIndex = 0
+
+        let choices = game.currentNightRoleChoices()
+        let drunkChoice = try #require(choices.first(where: { $0.roleId == "drunk" }))
+        let drunkPlayer = try #require(game.players.first(where: { $0.roleId == "drunk" }))
+
+        game.autoSelectPlayerForRoleChoice(drunkChoice)
+
+        #expect(game.currentNightTargets == [drunkPlayer.id])
+    }
+
+    @Test func librarianSelectingAbsentDrunkTargetsSpyFallback() throws {
+        let game = makeAssignedGame(
+            templateId: "trouble-brewing",
+            roleIds: ["librarian", "chef", "butler", "spy", "imp"]
+        )
+        game.appLanguage = .english
+        game.phase = .firstNight
+        game.isFirstNightPhase = true
+        game.currentNightSteps = [NightStepTemplate(id: "test-librarian", roleId: "librarian", condition: .always)]
+        game.currentNightStepIndex = 0
+
+        let choices = game.currentNightRoleChoices()
+        let drunkChoice = try #require(choices.first(where: { $0.roleId == "drunk" }))
+        let spyPlayer = try #require(game.players.first(where: { $0.roleId == "spy" }))
+
+        game.autoSelectPlayerForRoleChoice(drunkChoice)
+
+        #expect(game.currentNightTargets == [spyPlayer.id])
     }
 
     @Test func recluseInPlayUnlocksAllMinionsForInvestigator() {

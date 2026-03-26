@@ -2234,7 +2234,6 @@ final class ClocktowerGameViewModel: ObservableObject {
     private func disallowedFlexibleRegistrationRoleIds(for detectorRoleId: String) -> Set<String> {
         [
             detectorRoleId,
-            "drunk",
             "marionette"
         ]
     }
