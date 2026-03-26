@@ -1,4 +1,13 @@
 import SwiftUI
+#if canImport(UIKit)
+import UIKit
+#endif
+
+#if canImport(UIKit)
+func dismissActiveKeyboard() {
+    UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
+}
+#endif
 
 struct ContentView: View {
     @EnvironmentObject private var game: ClocktowerGameViewModel
@@ -28,6 +37,13 @@ struct ContentView: View {
                 }
             }
             .padding()
+            .background {
+                Color.clear
+                    .contentShape(Rectangle())
+                    .onTapGesture {
+                        dismissActiveKeyboard()
+                    }
+            }
             .navigationTitle(game.appDisplayName)
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {

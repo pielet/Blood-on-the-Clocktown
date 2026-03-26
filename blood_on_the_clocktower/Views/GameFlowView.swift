@@ -31,8 +31,18 @@ struct GameFlowView: View {
 
                     actionLogPanel
                 }
+                .animation(.easeInOut(duration: 0.24), value: expandedPlayerIDs)
+                .frame(maxWidth: .infinity, alignment: .leading)
                 .padding(.bottom, 12)
+                .background {
+                    Color.clear
+                        .contentShape(Rectangle())
+                        .onTapGesture {
+                            dismissActiveKeyboard()
+                        }
+                }
             }
+            .scrollDismissesKeyboard(.immediately)
             .onChange(of: game.currentNightStepIndex) { _, _ in
                 manualNote = ""
             }
@@ -61,7 +71,6 @@ struct GameFlowView: View {
                         }
                     }
                 }
-                .animation(.easeInOut(duration: 0.24), value: expandedPlayerIDs)
             }
         }
     }
@@ -725,7 +734,6 @@ struct GameFlowView: View {
                             nightStepSection(step: step, actor: actor, role: role)
                             nightActionButtons
                         }
-                        .transaction { $0.animation = nil }
                     } else {
                         Text(game.ui("Night order is complete. Wait for dawn.", "夜间流程已结束，等待天亮。"))
                             .font(.caption)

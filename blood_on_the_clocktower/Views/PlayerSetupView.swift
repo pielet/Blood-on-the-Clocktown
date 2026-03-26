@@ -72,7 +72,7 @@ struct PlayerSetupView: View {
                     drunkSelectionPanel
                 }
 
-                Button(deckReady ? game.ui("Draw Roles Again", "重新抽取角色牌") : game.ui("Draw Roles", "抽取角色牌")) {
+                Button {
                     var transaction = Transaction()
                     transaction.disablesAnimations = true
                     withTransaction(transaction) {
@@ -80,9 +80,17 @@ struct PlayerSetupView: View {
                         game.buildDeck()
                         deckReady = true
                     }
+                } label: {
+                    Text(deckReady ? game.ui("Draw Roles Again", "重新抽取角色牌") : game.ui("Draw Roles", "抽取角色牌"))
+                        .contentTransition(.identity)
                 }
                 .buttonStyle(.bordered)
                 .accessibilityIdentifier("setup-drawRoles")
+                .transaction { transaction in
+                    transaction.animation = nil
+                }
+                .animation(nil, value: deckReady)
+                .animation(nil, value: game.roleDeck.count)
 
                 Button(game.ui("Assign Roles", "开始发牌")) {
                     game.playerSetup()
@@ -94,7 +102,15 @@ struct PlayerSetupView: View {
             .frame(maxWidth: .infinity, alignment: .leading)
             .padding(.top, 8)
             .padding(.bottom, 24)
+            .background {
+                Color.clear
+                    .contentShape(Rectangle())
+                    .onTapGesture {
+                        dismissActiveKeyboard()
+                    }
+            }
         }
+        .scrollDismissesKeyboard(.immediately)
         .onAppear {
             count = game.playerCount
             deckReady = !game.roleDeck.isEmpty
