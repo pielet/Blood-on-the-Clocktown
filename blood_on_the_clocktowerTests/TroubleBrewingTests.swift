@@ -704,6 +704,25 @@ import Testing
         #expect(game.votesByVoter[butler.id] == nominee.id)
     }
 
+    @Test func butlerVoteIsCanceledWhenMasterCancelsVote() {
+        let game = makeAssignedGame(templateId: "trouble-brewing", roleIds: ["butler", "washerwoman", "imp", "poisoner"])
+        let butler = game.players[0]
+        let master = game.players[1]
+        let nominee = game.players[2]
+
+        game.updateButlerMaster(butler.id, master.id)
+        game.setNominator(master.id)
+        game.setNominee(nominee.id)
+
+        game.castVote(voter: master.id, nominee: nominee.id)
+        game.castVote(voter: butler.id, nominee: nominee.id)
+        #expect(game.votesByVoter[butler.id] == nominee.id)
+
+        game.castVote(voter: master.id, nominee: nil)
+        #expect(game.votesByVoter[master.id] == nil)
+        #expect(game.votesByVoter[butler.id] == nil)
+    }
+
     // MARK: - Voting Mechanics
 
     @Test func livingPlayersCanVoteInMultipleNominationsOnSameDay() {

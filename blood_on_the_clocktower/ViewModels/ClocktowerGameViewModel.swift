@@ -4071,6 +4071,7 @@ final class ClocktowerGameViewModel: ObservableObject {
         } else {
             votesByVoter.removeValue(forKey: voter)
         }
+        reconcileButlerVotes(forMasterId: voter)
     }
 
     func setNominator(_ nominator: UUID?) {
@@ -5331,6 +5332,16 @@ final class ClocktowerGameViewModel: ObservableObject {
         guard let nominee else { return true }
         guard let masterChoice = votesByVoter[master.id] else { return false }
         return masterChoice == nominee
+    }
+
+    private func reconcileButlerVotes(forMasterId masterId: UUID) {
+        let masterChoice = votesByVoter[masterId]
+        for player in players where player.roleId == "butler" && player.butlerMasterId == masterId {
+            guard let butlerChoice = votesByVoter[player.id] else { continue }
+            if masterChoice != butlerChoice {
+                votesByVoter.removeValue(forKey: player.id)
+            }
+        }
     }
 
     private func maybeProcessVirginNomination(_ nomineeId: UUID?, nominatorRegistersAsTownsfolk: Bool? = nil) {
