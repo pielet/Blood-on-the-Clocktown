@@ -14,12 +14,8 @@ struct PlayerRowView: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
-            Button(action: onToggleExpanded) {
-                header
-            }
-            .buttonStyle(.plain)
-            .zIndex(1)
-            .accessibilityIdentifier("player-row-\(player.seatNumber)")
+            header
+                .zIndex(1)
 
             if isExpanded {
                 VStack(alignment: .leading, spacing: 10) {
@@ -32,6 +28,7 @@ struct PlayerRowView: View {
                 .transition(.opacity)
             }
         }
+        .frame(maxWidth: .infinity, alignment: .leading)
         .padding(10)
         .background(
             RoundedRectangle(cornerRadius: 12)
@@ -42,7 +39,11 @@ struct PlayerRowView: View {
                 .stroke(Color.black.opacity(0.08), lineWidth: 1)
         )
         .clipShape(RoundedRectangle(cornerRadius: 12))
+        .contentShape(RoundedRectangle(cornerRadius: 12))
+        .onTapGesture(perform: onToggleExpanded)
         .animation(.easeInOut(duration: 0.22), value: isExpanded)
+        .accessibilityAddTraits(.isButton)
+        .accessibilityIdentifier("player-row-\(player.seatNumber)")
     }
 
     private var header: some View {
@@ -88,6 +89,7 @@ struct PlayerRowView: View {
                 .font(.caption.weight(.bold))
                 .foregroundStyle(.secondary)
         }
+        .frame(maxWidth: .infinity, alignment: .leading)
     }
 
     private var roleDetailSection: some View {

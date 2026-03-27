@@ -6,28 +6,34 @@ struct AssignmentView: View {
 
     private let activeCardBackAsset = "card_back_active_flat"
     private let inactiveCardBackAsset = "card_back_inactive_flat"
-    private let assignmentColumns = [
-        GridItem(.adaptive(minimum: 104, maximum: 152), spacing: 18)
-    ]
+    private let assignmentColumnCount = 3
+    private let assignmentGridSpacing: CGFloat = 10
+    private let assignmentGridPadding = EdgeInsets(top: 6, leading: 4, bottom: 6, trailing: 4)
+    private let assignmentButtonAreaHeight: CGFloat = 56
 
     var body: some View {
-        VStack(spacing: 18) {
-            cardGrid
-            beginNightButton
+        GeometryReader { proxy in
+            let layout = assignmentLayout(in: proxy.size)
+
+            VStack(spacing: 12) {
+                cardGrid(layout: layout)
+                beginNightButton
+            }
+            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
         }
     }
 
-    private var cardGrid: some View {
-        ScrollView {
-            LazyVGrid(columns: assignmentColumns, spacing: 18) {
-                ForEach(Array(game.roleDeck.enumerated()), id: \.element.id) { index, card in
-                    assignmentCard(for: card)
-                        .accessibilityIdentifier("assignment-card-\(index)")
+    private func cardGrid(layout: AssignmentLayout) -> some View {
+        Group {
+            if layout.usesScrollView {
+                ScrollView {
+                    assignmentGrid(layout: layout)
                 }
+            } else {
+                assignmentGrid(layout: layout)
             }
-            .padding(.horizontal, 10)
-            .padding(.vertical, 10)
         }
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
     }
 
     private var beginNightButton: some View {
@@ -41,8 +47,18 @@ struct AssignmentView: View {
         .accessibilityIdentifier("assignment-nightFalls")
     }
 
+    private func assignmentGrid(layout: AssignmentLayout) -> some View {
+        LazyVGrid(columns: layout.columns, spacing: assignmentGridSpacing) {
+            ForEach(Array(game.roleDeck.enumerated()), id: \.element.id) { index, card in
+                assignmentCard(for: card, cardHeight: layout.cardHeight)
+                    .accessibilityIdentifier("assignment-card-\(index)")
+            }
+        }
+        .padding(assignmentGridPadding)
+    }
+
     @ViewBuilder
-    private func assignmentCard(for card: RoleDeckCard) -> some View {
+    private func assignmentCard(for card: RoleDeckCard, cardHeight: CGFloat) -> some View {
         let isFront = card.state == .front
         let isUsed = card.state == .used
         let showsInactiveBack = isFront || isUsed
@@ -58,9 +74,9 @@ struct AssignmentView: View {
             } back: {
                 assignmentCardBack(isUsed: showsInactiveBack)
             }
-            .frame(height: 156)
-            .padding(.horizontal, 8)
-            .padding(.vertical, 4)
+            .frame(height: cardHeight)
+            .padding(.horizontal, 4)
+            .padding(.vertical, 2)
             .contentShape(RoundedRectangle(cornerRadius: 12))
         }
         .buttonStyle(.plain)
@@ -71,10 +87,10 @@ struct AssignmentView: View {
     private func assignmentCardFront(card: RoleDeckCard) -> some View {
         let role = game.assignmentDisplayRole(for: card)
 
-        return VStack(spacing: 10) {
+        return VStack(spacing: 8) {
             if let role {
                 RoleIconImage(role: role)
-                    .frame(width: 58, height: 58)
+                    .frame(width: 52, height: 52)
 
                 Text(game.localizedRoleName(role))
                     .font(.headline)
@@ -103,7 +119,7 @@ struct AssignmentView: View {
             }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .padding(14)
+        .padding(12)
         .background(
             RoundedRectangle(cornerRadius: 12)
                 .fill(
@@ -137,6 +153,37 @@ struct AssignmentView: View {
         .shadow(color: Color.black.opacity(isUsed ? 0.08 : 0.16), radius: 8, y: 4)
     }
 
+    private func assignmentLayout(in size: CGSize) -> AssignmentLayout {
+        let rows = max(1, Int(ceil(Double(game.roleDeck.count) / Double(assignmentColumnCount))))
+        let visibleRows = min(rows, 3)
+        let columns = Array(
+            repeating: GridItem(.flexible(), spacing: assignmentGridSpacing),
+            count: assignmentColumnCount
+        )
+
+        let totalHorizontalSpacing = CGFloat(assignmentColumnCount - 1) * assignmentGridSpacing
+        let availableWidth = max(
+            0,
+            size.width - assignmentGridPadding.leading - assignmentGridPadding.trailing - totalHorizontalSpacing
+        )
+        let cardWidth = availableWidth / CGFloat(assignmentColumnCount)
+
+        let totalVerticalSpacing = CGFloat(max(0, visibleRows - 1)) * assignmentGridSpacing
+        let availableHeight = max(
+            0,
+            size.height - assignmentButtonAreaHeight - 12 - assignmentGridPadding.top - assignmentGridPadding.bottom - totalVerticalSpacing
+        )
+        let rowHeight = availableHeight / CGFloat(visibleRows)
+        let preferredCardHeight = cardWidth * 1.38
+        let cardHeight = max(108, min(preferredCardHeight, rowHeight))
+
+        return AssignmentLayout(
+            columns: columns,
+            cardHeight: cardHeight,
+            usesScrollView: rows > 3
+        )
+    }
+
     private var assignmentCardFrontGradientColors: [Color] {
         if colorScheme == .dark {
             return [
@@ -166,6 +213,12 @@ struct AssignmentView: View {
 
         return Color.black.opacity(0.08)
     }
+}
+
+private struct AssignmentLayout {
+    let columns: [GridItem]
+    let cardHeight: CGFloat
+    let usesScrollView: Bool
 }
 
 #if DEBUG
