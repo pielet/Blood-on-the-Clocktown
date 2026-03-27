@@ -849,6 +849,67 @@ import Testing
         #expect(!game.isPlayerPoisonedOrDrunk(game.players[1]))
     }
 
+    @Test func poisonerPoisonPersistsWhenPoisonerBecomesImp() {
+        let game = makeAssignedGame(
+            templateId: "trouble-brewing",
+            roleIds: ["poisoner", "slayer", "washerwoman", "imp", "baron"]
+        )
+        let poisoner = game.players[0]
+        let slayer = game.players[1]
+        let imp = game.players[3]
+
+        runNightStep(game, roleId: "poisoner", targets: [slayer.id])
+        #expect(game.isPlayerPoisonedOrDrunk(game.players[1]))
+
+        runNightStep(game, roleId: "imp", targets: [imp.id])
+        #expect(!game.players[3].alive)
+
+        game.selectImpReplacement(poisoner.id)
+
+        #expect(game.players[0].roleId == "imp")
+        #expect(game.players[0].alive)
+        #expect(game.isPlayerPoisonedOrDrunk(game.players[1]))
+
+        game.phase = .day
+        game.currentDayNumber = 1
+        game.chooseSlayerTarget(game.players[0].id)
+        game.useSlayerShot()
+
+        #expect(game.players[0].alive)
+    }
+
+    @Test func poisonedRavenkeeperUsesStorytellerChosenFalseRole() {
+        let game = makeAssignedGame(
+            templateId: "trouble-brewing",
+            roleIds: ["poisoner", "ravenkeeper", "washerwoman", "imp", "baron"]
+        )
+        let ravenkeeper = game.players[1]
+        let target = game.players[2]
+
+        runNightStep(game, roleId: "poisoner", targets: [ravenkeeper.id])
+
+        if let index = game.players.firstIndex(where: { $0.id == ravenkeeper.id }) {
+            game.players[index].alive = false
+            game.players[index].isDeadTonight = true
+        }
+
+        game.phase = .night
+        game.isFirstNightPhase = false
+        game.currentNightSteps = [NightStepTemplate(id: "test-ravenkeeper", roleId: "ravenkeeper", condition: .always)]
+        game.currentNightStepIndex = 0
+        game.currentNightTargets = [target.id]
+
+        let roleChoices = game.currentNightRoleChoices()
+        #expect(roleChoices.contains(where: { $0.roleId == "baron" }))
+
+        game.currentNightNote = "baron"
+        game.completeCurrentNightAction()
+
+        #expect(game.gameLog.contains(where: { $0.englishText.contains("learned that Player3 is the Baron") }))
+        #expect(!game.gameLog.contains(where: { $0.englishText.contains("learned that Player3 is the Washerwoman") }))
+        #expect(game.players[1].roleLog.contains(where: { $0.contains("Learned that Player3 is the Baron") }))
+    }
+
     // MARK: - Scarlet Woman threshold edge case
 
     @Test func scarletWomanPriorityWithExactlyFiveAliveBeforeImpDeath() {

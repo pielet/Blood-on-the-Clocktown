@@ -103,6 +103,7 @@ final class ClocktowerGameViewModel: ObservableObject {
     private var huntsmanUsedPlayerIds: Set<UUID> = []
     private var seamstressUsedPlayerIds: Set<UUID> = []
     private var poisonerPoisonedPlayerId: UUID?
+    private var poisonerPoisonSourcePlayerId: UUID?
     private var pukkaPoisonedPlayerId: UUID?
     private var poChargedPlayerIds: Set<UUID> = []
     private var sweetheartDrunkPlayerId: UUID?
@@ -1112,8 +1113,7 @@ final class ClocktowerGameViewModel: ObservableObject {
     }
 
     private func persistentPoisonStatus(for player: PlayerCard) -> String? {
-        if let poisonerPoisonedPlayerId, poisonerPoisonedPlayerId == player.id,
-           players.contains(where: { $0.alive && $0.roleId == "poisoner" }) {
+        if poisonerPoisonIsActive(on: player) {
             return ui("Poisoned by Poisoner (until dusk)", "被投毒者投毒（持续至黄昏）")
         }
         if let widowPoisonedPlayerId, widowPoisonedPlayerId == player.id,
@@ -1402,6 +1402,7 @@ final class ClocktowerGameViewModel: ObservableObject {
         huntsmanUsedPlayerIds.removeAll()
         seamstressUsedPlayerIds.removeAll()
         poisonerPoisonedPlayerId = nil
+        poisonerPoisonSourcePlayerId = nil
         pukkaPoisonedPlayerId = nil
         poChargedPlayerIds.removeAll()
         sweetheartDrunkPlayerId = nil
@@ -2259,6 +2260,14 @@ final class ClocktowerGameViewModel: ObservableObject {
         return roleTemplate(for: actualRoleId)
     }
 
+    private func shouldUseFullRolePoolForExactReveal(roleId: String) -> Bool {
+        guard roleId == "ravenkeeper",
+              let actor = currentNightActor else {
+            return false
+        }
+        return isAbilitySuppressed(actor) || isDisplayedDrunk(actor, actingAs: roleId)
+    }
+
     private func shouldUseFullRolePoolForTroubleBrewingInfo(team: RoleTeam) -> Bool {
         if isCurrentNightDisplayedDrunk() {
             return true
@@ -2447,6 +2456,13 @@ final class ClocktowerGameViewModel: ObservableObject {
     }
 
     private func nightRoleChoices(for roleId: String) -> [NightRoleChoiceOption] {
+        if shouldUseFullRolePoolForExactReveal(roleId: roleId) {
+            let roleIds = Set(phaseTemplate.roles
+                .filter { $0.team != .traveller }
+                .map { $0.id })
+            return sortedRoleOptions(ids: roleIds)
+        }
+
         let matchingTeam = troubleBrewingInfoTeam(for: roleId)
 
         if let exactRevealPlayer = currentNightExactRevealPlayer(for: roleId),
@@ -3272,6 +3288,7 @@ final class ClocktowerGameViewModel: ObservableObject {
             }
         case "poisoner":
             poisonerPoisonedPlayerId = targets.first
+            poisonerPoisonSourcePlayerId = actor.id
             for target in targets { setPoisoned(target, true) }
             appendActionLog("\(actor.name) poisoned \(targetText).", "\(actor.name) 对 \(targetText) 施加了中毒。")
         case "widow":
@@ -3363,8 +3380,20 @@ final class ClocktowerGameViewModel: ObservableObject {
             }
         case "ravenkeeper":
             if let target = targets.first,
-               let targetPlayer = playerLookup(by: target),
-               let shownRole = resolvedExactRevealRole(for: targetPlayer, selectedRoleId: note) {
+               let targetPlayer = playerLookup(by: target) {
+                let shownRole: RoleTemplate?
+                if shouldUseFullRolePoolForExactReveal(roleId: roleId) {
+                    shownRole = roleTemplate(for: note)
+                } else {
+                    shownRole = resolvedExactRevealRole(for: targetPlayer, selectedRoleId: note)
+                }
+                guard let shownRole else {
+                    appendActionLog(
+                        "\(actor.name) inspected \(targetPlayer.name), but the storyteller still needs to choose the shown role.",
+                        "\(actor.name) 查看了 \(targetPlayer.name)，但说书人仍需选择要展示的角色。"
+                    )
+                    break
+                }
                 let shownRoleName = localizedRoleName(shownRole)
                 recordTargets = [target]
                 recordTargetText = targetPlayer.name
@@ -4497,6 +4526,7 @@ final class ClocktowerGameViewModel: ObservableObject {
 
     private func expireDuskLimitedEffects() {
         poisonerPoisonedPlayerId = nil
+        poisonerPoisonSourcePlayerId = nil
         temporaryDrunkPlayerUntilDayNumbers = temporaryDrunkPlayerUntilDayNumbers.filter { $0.value > currentDayNumber }
         temporaryDrunkPlayerSources = temporaryDrunkPlayerSources.filter { playerId, _ in
             (temporaryDrunkPlayerUntilDayNumbers[playerId] ?? -1) > currentDayNumber
@@ -4670,9 +4700,7 @@ final class ClocktowerGameViewModel: ObservableObject {
         if player.poisonedTonight {
             return true
         }
-        if let poisonerPoisonedPlayerId,
-           poisonerPoisonedPlayerId == player.id,
-           players.contains(where: { $0.alive && $0.roleId == "poisoner" }) {
+        if poisonerPoisonIsActive(on: player) {
             return true
         }
         if let widowPoisonedPlayerId,
@@ -4705,6 +4733,17 @@ final class ClocktowerGameViewModel: ObservableObject {
             return true
         }
         return false
+    }
+
+    private func poisonerPoisonIsActive(on player: PlayerCard) -> Bool {
+        guard let poisonerPoisonedPlayerId,
+              poisonerPoisonedPlayerId == player.id else {
+            return false
+        }
+        if let poisonerPoisonSourcePlayerId {
+            return players.contains { $0.id == poisonerPoisonSourcePlayerId && $0.alive }
+        }
+        return players.contains { $0.alive && $0.roleId == "poisoner" }
     }
 
     private func playerIsExternallyDrunk(_ player: PlayerCard) -> Bool {
