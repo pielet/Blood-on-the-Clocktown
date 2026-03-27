@@ -85,6 +85,7 @@ struct PlayerSetupView: View {
                         .contentTransition(.identity)
                 }
                 .buttonStyle(.bordered)
+                .frame(maxWidth: .infinity, alignment: .center)
                 .accessibilityIdentifier("setup-drawRoles")
                 .transaction { transaction in
                     transaction.animation = nil
@@ -96,6 +97,7 @@ struct PlayerSetupView: View {
                     game.playerSetup()
                 }
                 .buttonStyle(.borderedProminent)
+                .frame(maxWidth: .infinity, alignment: .center)
                 .disabled(!deckReady || !game.canStartRoleAssignment)
                 .accessibilityIdentifier("setup-assignRoles")
             }

@@ -1069,19 +1069,30 @@ struct GameFlowView: View {
     }
 
     private var wakeProgressChart: some View {
-        ScrollView(.horizontal, showsIndicators: false) {
-            HStack(spacing: 8) {
-                ForEach(Array(game.currentNightSteps.enumerated()), id: \.offset) { index, step in
-                    wakeProgressChip(index: index, step: step)
+        ScrollViewReader { proxy in
+            ScrollView(.horizontal, showsIndicators: false) {
+                HStack(spacing: 8) {
+                    ForEach(Array(game.currentNightSteps.enumerated()), id: \.offset) { index, step in
+                        wakeProgressChip(index: index, step: step)
+                            .id(index)
 
-                    if index < game.currentNightSteps.count - 1 {
-                        Image(systemName: "arrow.right")
-                            .font(.caption2.weight(.bold))
-                            .foregroundStyle(.secondary.opacity(0.55))
+                        if index < game.currentNightSteps.count - 1 {
+                            Image(systemName: "arrow.right")
+                                .font(.caption2.weight(.bold))
+                                .foregroundStyle(.secondary.opacity(0.55))
+                        }
                     }
                 }
+                .padding(.vertical, 4)
             }
-            .padding(.vertical, 4)
+            .onChange(of: game.currentNightStepIndex) { _, newIndex in
+                withAnimation(.easeInOut(duration: 0.3)) {
+                    proxy.scrollTo(newIndex, anchor: .center)
+                }
+            }
+            .onAppear {
+                proxy.scrollTo(game.currentNightStepIndex, anchor: .center)
+            }
         }
     }
 

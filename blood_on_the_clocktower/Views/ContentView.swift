@@ -88,6 +88,10 @@ struct ContentView: View {
                         Text(timerText)
                             .font(.title3.monospacedDigit())
                         HStack(spacing: 6) {
+                            timerAddButton(60)
+                            timerAddButton(120)
+                            timerAddButton(300)
+
                             Button(game.timerRunning ? game.ui("Pause", "暂停") : game.ui("Start", "开始")) {
                                 game.toggleTimer()
                             }
@@ -95,10 +99,6 @@ struct ContentView: View {
                             .controlSize(.regular)
                             .lineLimit(1)
                             .fixedSize(horizontal: true, vertical: false)
-
-                            timerAddButton(60)
-                            timerAddButton(120)
-                            timerAddButton(300)
                         }
                         .fixedSize(horizontal: true, vertical: false)
                     }

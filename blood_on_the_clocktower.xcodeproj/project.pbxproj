@@ -24,9 +24,9 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
-		FD0C1C162F7090810017EE41 /* blood_on_the_clocktower.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; name = blood_on_the_clocktower.app; path = /Users/pielet/Projects/blood/blood_on_the_clocktower/build/Debug/blood_on_the_clocktower.app; sourceTree = "<absolute>"; };
-		FD0C1C252F7090820017EE41 /* blood_on_the_clocktowerTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; name = blood_on_the_clocktowerTests.xctest; path = /Users/pielet/Projects/blood/blood_on_the_clocktower/build/Debug/blood_on_the_clocktower.app/Contents/PlugIns/blood_on_the_clocktowerTests.xctest; sourceTree = "<absolute>"; };
-		FD0C1C2F2F7090820017EE41 /* blood_on_the_clocktowerUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; name = blood_on_the_clocktowerUITests.xctest; path = "/Users/pielet/Projects/blood/blood_on_the_clocktower/build/Debug/blood_on_the_clocktowerUITests-Runner.app/Contents/PlugIns/blood_on_the_clocktowerUITests.xctest"; sourceTree = "<absolute>"; };
+		FD0C1DDE2F75511A0017EE41 /* blood_on_the_clocktower.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = blood_on_the_clocktower.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		FD0C1DDF2F75511A0017EE41 /* blood_on_the_clocktowerTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = blood_on_the_clocktowerTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		FD0C1DE02F75511A0017EE41 /* blood_on_the_clocktowerUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = blood_on_the_clocktowerUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -78,6 +78,9 @@
 				FD0C1C182F7090810017EE41 /* blood_on_the_clocktower */,
 				FD0C1C282F7090820017EE41 /* blood_on_the_clocktowerTests */,
 				FD0C1C322F7090820017EE41 /* blood_on_the_clocktowerUITests */,
+				FD0C1DDE2F75511A0017EE41 /* blood_on_the_clocktower.app */,
+				FD0C1DDF2F75511A0017EE41 /* blood_on_the_clocktowerTests.xctest */,
+				FD0C1DE02F75511A0017EE41 /* blood_on_the_clocktowerUITests.xctest */,
 			);
 			sourceTree = "<group>";
 		};
@@ -103,7 +106,7 @@
 			packageProductDependencies = (
 			);
 			productName = blood_on_the_clocktower;
-			productReference = FD0C1C162F7090810017EE41 /* blood_on_the_clocktower.app */;
+			productReference = FD0C1DDE2F75511A0017EE41 /* blood_on_the_clocktower.app */;
 			productType = "com.apple.product-type.application";
 		};
 		FD0C1C242F7090820017EE41 /* blood_on_the_clocktowerTests */ = {
@@ -126,7 +129,7 @@
 			packageProductDependencies = (
 			);
 			productName = blood_on_the_clocktowerTests;
-			productReference = FD0C1C252F7090820017EE41 /* blood_on_the_clocktowerTests.xctest */;
+			productReference = FD0C1DDF2F75511A0017EE41 /* blood_on_the_clocktowerTests.xctest */;
 			productType = "com.apple.product-type.bundle.unit-test";
 		};
 		FD0C1C2E2F7090820017EE41 /* blood_on_the_clocktowerUITests */ = {
@@ -149,7 +152,7 @@
 			packageProductDependencies = (
 			);
 			productName = blood_on_the_clocktowerUITests;
-			productReference = FD0C1C2F2F7090820017EE41 /* blood_on_the_clocktowerUITests.xctest */;
+			productReference = FD0C1DE02F75511A0017EE41 /* blood_on_the_clocktowerUITests.xctest */;
 			productType = "com.apple.product-type.bundle.ui-testing";
 		};
 /* End PBXNativeTarget section */
