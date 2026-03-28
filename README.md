@@ -1,47 +1,58 @@
-# Blood on the Clocktower
+# Blood on the Clocktower — Storyteller Companion
 
-Standalone SwiftUI iOS app for running a Blood on the Clocktower game. The project includes script selection, player setup, secret role assignment, guided game flow, bilingual English and Chinese UI text, and automated tests around core Trouble Brewing behavior.
+A standalone SwiftUI iOS app that helps storytellers run Blood on the Clocktower games. Handles script selection, player setup, secret role assignment, night/day phase tracking, voting, and game-over detection — all with a bilingual English/Chinese interface.
+
+## Screenshots
+
+*(Coming soon)*
+
+## Supported Editions
+
+| Edition | Status |
+|---------|--------|
+| **Trouble Brewing** | Roughly tested — includes experimental roles with no known bugs so far. 53 unit tests and deterministic trace tests cover core role interactions. |
+| **Bad Moon Rising** | Playable but under active development. Some role interactions have known bugs. |
+| **Sects & Violets** | Playable but under active development. Some role interactions have known bugs. |
+
+Bad Moon Rising and Sects & Violets updates are still under development and will be released soon.
 
 ## Features
 
-- Script selection for the official base editions: Trouble Brewing, Bad Moon Rising, and Sects and Violets
-- Optional experimental-role toggles during setup
-- Player setup and role deck generation
-- Secret assignment flow for handing roles to players one at a time
-- Night and day game flow tracking with timers, logs, and action records
-- English and Simplified Chinese interface text
-- Unit and trace tests for key gameplay logic
-
-## Project Layout
-
-- `blood_on_the_clocktower.xcodeproj`: Xcode project for the app and test targets
-- `blood_on_the_clocktower/`: app source, assets, view models, and script data
-- `blood_on_the_clocktowerTests/`: unit and trace tests
-- `blood_on_the_clocktowerUITests/`: UI tests
+- **Script selection** for three official base editions plus optional experimental role toggles
+- **Player setup** with configurable player count (5–20) and automatic team distribution
+- **Secret role assignment** with flip-card reveal UI — hand the device around the table
+- **Imp bluff panel** shown to the Demon player during assignment
+- **Night phases** with role-ordered wake queue and storyteller-assisted action prompts
+- **Day phases** with nomination, voting (Butler master restriction, ghost votes), and execution
+- **Storyteller tools**: flexible registration overrides, misinformation-flagged logs, poison tracking
+- **Game-over detection**: no Demon alive, evil majority, Saint executed, Mayor survived, and more
+- **127 role icons** covering all three base scripts and experimental roles
+- **Bilingual UI**: English and Simplified Chinese throughout
+- **Day timer** with configurable duration and pause/resume
 
 ## Requirements
 
-- A recent version of Xcode with Swift and iOS simulator support
-- macOS for local development and simulator testing
+- **Xcode 26+** with Swift 5.0 and iOS Simulator support
+- **macOS 26** (Tahoe) or later
+- **iOS 26.2+** deployment target
+- Apple Developer Program membership ($99/year) if publishing to the App Store
 
 ## Getting Started
 
-1. Open `blood_on_the_clocktower.xcodeproj` in Xcode.
-2. Select the `blood_on_the_clocktower` app target or scheme.
-3. Choose an iPhone simulator.
-4. Build and run the app.
+1. Clone the repository.
+2. Open `blood_on_the_clocktower.xcodeproj` in Xcode.
+3. Select the `blood_on_the_clocktower` scheme and an iPhone simulator.
+4. Build and run (Cmd+R).
 
-From there, the app flow is:
+### App Flow
 
 1. Choose an edition.
 2. Enable any experimental-role options you want.
-3. Enter players and generate the setup.
+3. Enter player names and generate the setup.
 4. Hand the device around for secret role assignment.
 5. Run the game through the built-in night/day tracker.
 
 ## Running Tests
-
-Run the test targets from Xcode, or use `xcodebuild` from this directory:
 
 ```bash
 xcodebuild test \
@@ -50,7 +61,23 @@ xcodebuild test \
   -destination 'platform=iOS Simulator,name=iPhone 17 Pro'
 ```
 
-If your local simulator list differs, replace `iPhone 17 Pro` with any available simulator device.
+Replace `iPhone 17 Pro` with any available simulator if your local list differs.
+
+## Project Layout
+
+```
+blood_on_the_clocktower/
+├── blood_on_the_clocktower/
+│   ├── Views/              # SwiftUI views (ContentView, GameFlowView, etc.)
+│   ├── ViewModels/         # Game state and logic
+│   ├── Models/             # Core enums and data structures
+│   ├── Components/         # Reusable UI components
+│   ├── Data/               # JSON script data and loader
+│   └── Assets.xcassets/    # App icon, role icons, card backs
+├── blood_on_the_clocktowerTests/       # Unit and trace tests
+├── blood_on_the_clocktowerUITests/     # UI tests (scaffolded)
+└── .github/workflows/                  # CI/CD pipelines
+```
 
 ## CI/CD
 
@@ -61,15 +88,10 @@ The project includes GitHub Actions workflows:
 - **Release Drafter** (`release-drafter.yml`): Auto-generates draft release notes from merged PR titles.
 - **Dependabot** (`dependabot.yml`): Keeps GitHub Actions versions up to date weekly.
 
-### Recommended Branch Protection
+## License
 
-After pushing to GitHub, enable these rules under Settings > Branches > main:
+MIT — see [LICENSE](LICENSE) for details.
 
-1. Require a pull request before merging.
-2. Require status checks to pass (select the `SwiftLint`, `Build`, and `Test` checks).
-3. Require branches to be up to date before merging.
-4. Optionally require conversation resolution.
+## Disclaimer
 
-## Git Notes
-
-This folder is intended to work as its own standalone repository. The local `.gitignore` excludes Xcode user state, build products, and other machine-specific files so the repo only tracks project source, assets, and test code.
+Blood on the Clocktower is a trademark of The Pandemonium Institute. This is an unofficial fan-made companion app and is not affiliated with or endorsed by The Pandemonium Institute.

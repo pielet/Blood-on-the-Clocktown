@@ -5,7 +5,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [1.0.1] - 2026-03-25
+## [Unreleased]
+
+### Planned
+
+- Bad Moon Rising: fix remaining role interaction bugs (Zombuul, Pukka, Shabaloth, Po demons; Godfather, Devil's Advocate, Assassin, Mastermind minions; Gambler, Gossip, Professor).
+- Sects & Violets: fix remaining role interaction bugs (Fang Gu jump, Vigormortis/No Dashii neighbor poisoning, Vortox false-info enforcement; Pit-Hag, Cerenovus, Witch).
+- Expanded test coverage for Bad Moon Rising and Sects & Violets editions.
+- UI test implementation.
+
+## [1.0.1] - 2026-03-28
 
 ### Fixed
 
@@ -29,13 +38,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `run_blood.sh`: removed broken `run_logic_dry_run` reference, auto-detects simulator when none specified.
 - `.gitignore`: added `*.xcresult`, `*.xcarchive`, `__pycache__/`, generated image directories.
 
-## [1.0.0] - 2026-03-25
+## [1.0.0] - 2025-03-25
 
 ### Added
 
 - Script selection for Trouble Brewing, Bad Moon Rising, and Sects & Violets.
 - Optional experimental role toggles for each edition.
-- Player setup with configurable player count (5-20).
+- Player setup with configurable player count (5–20).
 - Role deck building with automatic team distribution (Baron outsider shift, Vigormortis reduction, Fang Gu extra outsider, etc.).
 - Secret role assignment flow with flip-card reveal UI.
 - Imp bluff setup panel for Demon players.
@@ -55,12 +64,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Cult Leader alignment flip and alternate win condition.
 - Fearmonger chosen-target execution win.
 - Legion only-evil-votes-don't-count mechanic.
-- Game-over detection: no demons alive, evil population lead, saint executed, mayor survived, evil no winning path.
+- Game-over detection: no demons alive, evil population lead, saint executed, mayor survived.
 - Bilingual UI: English and Simplified Chinese throughout.
 - Day timer with configurable duration and pause/resume.
 - Game log with timestamped events and misinformation markers.
 - Night action records for storyteller reference.
-- 100+ role icon assets.
+- 127 role icon assets covering all three base scripts and experimental roles.
 - 53 unit tests and 50-seed deterministic trace tests for Trouble Brewing.
 - CI pipeline: SwiftLint (strict), build, test with artifact upload.
 - Dependabot for GitHub Actions version updates.
@@ -69,7 +78,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Known Issues
 
-- Bad Moon Rising edition: gameplay logic has known bugs in several role interactions (Zombuul, Pukka, Shabaloth, Po demon mechanics; Godfather, Devil's Advocate, Assassin, Mastermind minion mechanics; Gambler, Gossip, Professor risk/recovery roles). Tests for these roles are pending.
-- Sects & Violets edition: gameplay logic has known bugs in several role interactions (Fang Gu jump, Vigormortis neighbor poisoning, No Dashii neighbor poisoning, Vortox false-info enforcement; Pit-Hag character changes, Cerenovus madness, Witch curse tracking). Tests for these roles are pending.
-- Experimental roles: many roles are marked as storyteller-resolved or manual. Automated logic coverage is partial. Tests for experimental roles are minimal.
-- UI tests (blood_on_the_clocktowerUITests) are scaffolded but not yet implemented.
+- Bad Moon Rising: gameplay logic has known bugs in several role interactions. Tests pending.
+- Sects & Violets: gameplay logic has known bugs in several role interactions. Tests pending.
+- Experimental roles: many are storyteller-resolved or manual. Automated logic coverage is partial.
+- UI tests are scaffolded but not yet implemented.
