@@ -1,19 +1,26 @@
-name: Archive
+name: Release
 
 on:
   push:
     tags:
-      - 'v*'
+      - "v*"
+
+permissions:
+  contents: write
 
 jobs:
-  archive:
-    name: Archive Release Build
+  publish_release:
+    name: Validate Release Build And Publish Release
     runs-on: macos-15
+    env:
+      TAG_NAME: ${{ github.ref_name }}
     steps:
       - uses: actions/checkout@v6
+
       - name: Select Xcode
         run: sudo xcode-select -s /Applications/Xcode.app
-      - name: Archive
+
+      - name: Archive Release Build
         run: |
           xcodebuild archive \
             -project blood_on_the_clocktower.xcodeproj \
@@ -24,9 +31,52 @@ jobs:
             -archivePath build/blood_on_the_clocktower.xcarchive \
             CODE_SIGN_IDENTITY=- \
             AD_HOC_CODE_SIGNING_ALLOWED=YES
-      - name: Upload Archive
-        uses: actions/upload-artifact@v7
-        with:
-          name: blood_on_the_clocktower-${{ github.ref_name }}.xcarchive
-          path: build/blood_on_the_clocktower.xcarchive
-          retention-days: 90
+
+      - name: Extract Release Notes From Changelog
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          version="${TAG_NAME#v}"
+          notes_file="release_notes.md"
+
+          awk -v version="$version" '
+            $0 ~ "^## \\[" version "\\]" { printing = 1 }
+            printing && $0 ~ "^## \\[" && $0 !~ "^## \\[" version "\\]" { exit }
+            printing { print }
+          ' CHANGELOG.md > "$notes_file"
+
+          if [[ ! -s "$notes_file" ]]; then
+            {
+              echo "## ${TAG_NAME}"
+              echo
+              echo "Release notes are not available in CHANGELOG.md yet."
+            } > "$notes_file"
+          fi
+
+          {
+            echo
+            echo "---"
+            echo
+            echo "Release build validation passed in CI."
+            echo
+            echo "No binary is attached to this release yet."
+            echo "An App Store distribution link will be added when available."
+          } >> "$notes_file"
+
+      - name: Publish GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          if gh release view "$TAG_NAME" >/dev/null 2>&1; then
+            gh release edit "$TAG_NAME" \
+              --title "$TAG_NAME" \
+              --notes-file release_notes.md
+          else
+            gh release create "$TAG_NAME" \
+              --title "$TAG_NAME" \
+              --notes-file release_notes.md
+          fi
