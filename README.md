@@ -1,6 +1,6 @@
 # Blood on the Clocktower — Storyteller Companion
 
-A standalone SwiftUI iOS app that helps storytellers run Blood on the Clocktower games. Handles script selection, player setup, secret role assignment, night/day phase tracking, voting, and game-over detection — all with a bilingual English/Chinese interface.
+A standalone SwiftUI iOS app that helps storytellers run Blood on the Clocktower games. It covers script selection, player setup, secret role assignment, night/day flow, voting, execution tracking, and game-over detection, with a bilingual English/Chinese interface.
 
 ## Screenshots
 
@@ -10,11 +10,11 @@ A standalone SwiftUI iOS app that helps storytellers run Blood on the Clocktower
 
 | Edition | Status |
 |---------|--------|
-| **Trouble Brewing** | Roughly tested — includes experimental roles with no known bugs so far. 53 unit tests and deterministic trace tests cover core role interactions. |
+| **Trouble Brewing** | Roughly tested with no known bugs so far. 53 unit tests and deterministic trace tests cover core role interactions. Experimental roles are included but not fully tested. |
 | **Bad Moon Rising** | Playable but under active development. Some role interactions have known bugs. |
 | **Sects & Violets** | Playable but under active development. Some role interactions have known bugs. |
 
-Bad Moon Rising and Sects & Violets updates are still under development and will be released soon.
+Bad Moon Rising and Sects & Violets updates are still under development and follow-up releases are coming soon.
 
 ## Features
 
@@ -29,13 +29,15 @@ Bad Moon Rising and Sects & Violets updates are still under development and will
 - **127 role icons** covering all three base scripts and experimental roles
 - **Bilingual UI**: English and Simplified Chinese throughout
 - **Day timer** with configurable duration and pause/resume
+- **CI/CD**: strict SwiftLint, build/test workflows, tagged archive builds, and release drafting
 
 ## Requirements
 
 - **Xcode 26+** with Swift 5.0 and iOS Simulator support
 - **macOS 26** (Tahoe) or later
 - **iOS 26.2+** deployment target
-- Apple Developer Program membership ($99/year) if publishing to the App Store
+
+Apple Developer Program membership is only needed if you plan to publish via TestFlight or the App Store.
 
 ## Getting Started
 
@@ -62,6 +64,13 @@ xcodebuild test \
 ```
 
 Replace `iPhone 17 Pro` with any available simulator if your local list differs.
+
+## Testing Status
+
+- **Trouble Brewing** is the most mature path and is the recommended script for actual play right now.
+- **Experimental Trouble Brewing roles** are supported and roughly tested, with no known bugs so far, but coverage is still lighter than the base script.
+- **Bad Moon Rising** and **Sects & Violets** are available for testing and development use, but not all role interactions are complete yet.
+- **UI tests** are scaffolded and CI-backed, but the main coverage is still in unit and deterministic trace tests.
 
 ## Project Layout
 
@@ -90,7 +99,7 @@ The project includes GitHub Actions workflows:
 
 ## License
 
-MIT — see [LICENSE](LICENSE) for details.
+Apache License 2.0 — see [LICENSE](LICENSE).
 
 ## Disclaimer
 

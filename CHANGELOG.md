@@ -20,15 +20,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Poisoner poison now persists through the following day until dusk, matching official rules ("poisoned tonight and tomorrow day"). Previously cleared at dawn.
 - Poisoner death now ends existing poison immediately (checks Poisoner alive).
+- Poisoner poison now still persists correctly if the Poisoner becomes the Imp after an Imp self-kill.
+- Poisoned Ravenkeeper can now be shown a storyteller-chosen false role, and that false role is logged correctly.
 - Scarlet Woman correctly gets priority when exactly 5 players are alive before Imp self-kill (off-by-one in alive count).
 - Slayer can now kill the Recluse if the storyteller chooses Demon registration (flexible registration prompt added).
 - Poisoned Slayer shot correctly fails during the day (poison persists through day).
+- Butler vote is now canceled immediately if the Butler's master cancels their vote.
+- Librarian can now select Drunk correctly when Spy is in play, including Drunk registration fallback behavior.
+- Night queue no longer keeps actor-died-tonight steps around for players who were already dead from previous nights.
 
 ### Added
 
 - Storyteller prompt when Slayer targets a Recluse: choose whether Recluse registers as Demon.
 - Persistent poison status indicator for Poisoner targets ("Poisoned by Poisoner (until dusk)").
-- 7 new unit tests: Poisoner day persistence, Poisoner dusk expiry, Poisoner death clears poison, Scarlet Woman 5-alive threshold, Slayer vs Recluse (both outcomes), poisoned Slayer during day.
+- Additional regression coverage for Poisoner day persistence, Poisoner dusk expiry, Poisoner death clearing poison, Poisoner-to-Imp poison carryover, poisoned Ravenkeeper false-role logging, Scarlet Woman 5-alive threshold, Slayer vs Recluse (both outcomes), poisoned Slayer during day, Butler vote cancelation, and poisoned info-log coloring in the grimoire.
 - Trace tests now handle Imp replacement selection, Slayer Recluse prompts, and Virgin registration prompts.
 - Pre-commit hook: blocks large files, gitignored files, and merge conflict markers.
 - PR template for standardized pull request descriptions.
@@ -37,6 +42,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - `run_blood.sh`: removed broken `run_logic_dry_run` reference, auto-detects simulator when none specified.
 - `.gitignore`: added `*.xcresult`, `*.xcarchive`, `__pycache__/`, generated image directories.
+- Dark-mode contrast and visibility improved across setup, grimoire, wake-order flow, Imp bluff screens, role assignment cards, and the Finished phase.
+- Grimoire rows now expand from the full player card, and role icons are slightly larger in both the grimoire and Finished phase.
+- Role assignment layout was tightened so a 3x3 card grid fits more reliably without scrolling.
+- Keyboard dismissal now works when tapping outside fields or scrolling in setup / game flow screens.
+- Grimoire info-log coloring now matches the event log for poison/drunk misinformation cases instead of being inferred only from role names in the text.
 
 ## [1.0.0] - 2025-03-25
 
