@@ -90,7 +90,7 @@ struct GameOverView: View {
     private func roleBadge(_ role: RoleTemplate, isCurrent: Bool) -> some View {
         HStack(spacing: 6) {
             RoleIconImage(role: role)
-                .frame(width: 22, height: 22)
+                .frame(width: 24, height: 24)
             Text(game.localizedRoleName(role))
                 .font(.footnote)
                 .foregroundStyle(isCurrent ? .primary : .secondary)

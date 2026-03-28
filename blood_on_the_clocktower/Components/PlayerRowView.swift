@@ -60,7 +60,7 @@ struct PlayerRowView: View {
 
                     if let role {
                         RoleIconImage(role: role)
-                            .frame(width: 22, height: 22)
+                            .frame(width: 24, height: 24)
                         Text(game.localizedRoleName(role))
                             .font(.caption.weight(.semibold))
                             .lineLimit(1)

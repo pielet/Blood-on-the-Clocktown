@@ -464,6 +464,23 @@ import Testing
         #expect(!poisonLogs.isEmpty, "Poisoned Empath should produce poison-colored log entries")
     }
 
+    @Test func poisonedInfoLogKeepsPoisonToneInGrimoire() throws {
+        let game = makeAssignedGame(
+            templateId: "trouble-brewing",
+            roleIds: ["poisoner", "librarian", "drunk", "imp", "baron"]
+        )
+        let librarian = game.players[1]
+        let drunk = game.players[2]
+
+        runNightStep(game, roleId: "poisoner", targets: [librarian.id])
+        runNightStep(game, roleId: "librarian", targets: [drunk.id], note: "drunk", firstNight: true)
+
+        let recordedLog = try #require(game.players[1].roleLog.last)
+
+        #expect(game.localizedRecordedLog(recordedLog).contains("drunk"))
+        #expect(game.logTone(forRecordedLog: recordedLog) == .poison)
+    }
+
     @Test func poisonedActiveRoleStillWakesInNightFlow() {
         let game = makeAssignedGame(
             templateId: "trouble-brewing",

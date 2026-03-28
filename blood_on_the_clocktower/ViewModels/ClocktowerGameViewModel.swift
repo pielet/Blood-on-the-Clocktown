@@ -4,6 +4,7 @@ import SwiftUI
 
 final class ClocktowerGameViewModel: ObservableObject {
     private let roleActionRecordPrefix = "[[role-action]]|"
+    private let recordedLogTonePrefix = "[[log-tone]]|"
     private let noOutsiderChoiceID = "__no_outsider__"
     private let nightRoleChoiceRegistrationSeparator = "::registered-by::"
 
@@ -267,10 +268,17 @@ final class ClocktowerGameViewModel: ObservableObject {
         color(for: event.logTone)
     }
 
+    func logTone(forRecordedLog text: String) -> LogTone {
+        let decoded = decodedRecordedLog(text)
+        if let toneOverride = decoded.toneOverride {
+            return toneOverride
+        }
+        let localizedText = localizedRecordedLog(decoded.text)
+        return LogToneClassifier.classify(englishText: decoded.text, chineseText: localizedText)
+    }
+
     func color(forRecordedLog text: String) -> Color {
-        let localizedText = localizedRecordedLog(text)
-        let tone = LogToneClassifier.classify(englishText: text, chineseText: localizedText)
-        return color(for: tone)
+        color(for: logTone(forRecordedLog: text))
     }
 
     func localizedTemplateName(_ template: ScriptTemplate) -> String {
@@ -409,7 +417,8 @@ final class ClocktowerGameViewModel: ObservableObject {
         }
     }
 
-    func localizedRecordedLog(_ text: String) -> String {
+    func localizedRecordedLog(_ rawText: String) -> String {
+        let text = decodedRecordedLog(rawText).text
         if let structured = localizedStructuredRoleAction(from: text) {
             return structured
         }
@@ -814,6 +823,62 @@ final class ClocktowerGameViewModel: ObservableObject {
         guard let roleId else { return noOutsiderChoiceID }
         guard let registeringPlayerId else { return roleId }
         return "\(roleId)\(nightRoleChoiceRegistrationSeparator)\(registeringPlayerId.uuidString)"
+    }
+
+    private func encodedRecordedLog(_ text: String, toneOverride: LogTone?) -> String {
+        guard let toneOverride else { return text }
+        return "\(recordedLogTonePrefix)\(encodedLogTone(toneOverride))|\(text)"
+    }
+
+    private func decodedRecordedLog(_ text: String) -> (text: String, toneOverride: LogTone?) {
+        guard text.hasPrefix(recordedLogTonePrefix) else {
+            return (text, nil)
+        }
+
+        let payload = String(text.dropFirst(recordedLogTonePrefix.count))
+        guard let separatorIndex = payload.firstIndex(of: "|") else {
+            return (text, nil)
+        }
+
+        let rawTone = String(payload[..<separatorIndex])
+        let rawText = String(payload[payload.index(after: separatorIndex)...])
+        return (rawText, decodedLogTone(rawTone))
+    }
+
+    private func encodedLogTone(_ tone: LogTone) -> String {
+        switch tone {
+        case .primary:
+            return "primary"
+        case .transfer:
+            return "transfer"
+        case .poison:
+            return "poison"
+        case .drunk:
+            return "drunk"
+        case .noAction:
+            return "no-action"
+        case .kill:
+            return "kill"
+        }
+    }
+
+    private func decodedLogTone(_ rawValue: String) -> LogTone? {
+        switch rawValue {
+        case "primary":
+            return .primary
+        case "transfer":
+            return .transfer
+        case "poison":
+            return .poison
+        case "drunk":
+            return .drunk
+        case "no-action":
+            return .noAction
+        case "kill":
+            return .kill
+        default:
+            return nil
+        }
     }
 
     private func decodedNightRoleChoice(from choiceId: String) -> (roleId: String?, registeringPlayerId: UUID?) {
@@ -1833,8 +1898,11 @@ final class ClocktowerGameViewModel: ObservableObject {
         let order = isFirstNightPhase ? phaseTemplate.nightOrderFirst : phaseTemplate.nightOrderStandard
         queue.append(contentsOf: order.filter { step in
             // Keep steps that might activate later in the night (e.g., Ravenkeeper dies mid-night)
+            // but only if the player is still alive — they could die during this night.
+            // Dead players from previous nights should not appear.
             if case .ifActorDiedTonight = step.condition {
-                return player(for: step.roleId) != nil
+                guard let actor = player(for: step.roleId) else { return false }
+                return actor.alive
             }
             return shouldKeepNightStep(step)
         })
@@ -3107,7 +3175,8 @@ final class ClocktowerGameViewModel: ObservableObject {
             )
             appendRoleRecord(
                 for: actor.id,
-                text: currentLogLine(for: actor, roleId: roleId, targetText: recordTargetText, note: recordNote)
+                text: currentLogLine(for: actor, roleId: roleId, targetText: recordTargetText, note: recordNote),
+                toneOverride: currentActionLogToneOverride
             )
             appendNightActionRecord(actor: actor.id, roleId: roleId, targets: recordTargets, note: recordNote)
             currentActionLogToneOverride = nil
@@ -3125,7 +3194,11 @@ final class ClocktowerGameViewModel: ObservableObject {
                     ui("\(actor.name) is poisoned — ability has no effect.", "\(actor.name) 今夜中毒——能力无效。"),
                     toneOverride: .poison
                 )
-                appendRoleRecord(for: actor.id, text: ui("\(actor.name) skipped \(localizedRoleName(roleTemplate(for: roleId))) because of poison.", "\(actor.name) 因中毒跳过了 \(localizedRoleName(roleTemplate(for: roleId)))。"))
+                appendRoleRecord(
+                    for: actor.id,
+                    text: ui("\(actor.name) skipped \(localizedRoleName(roleTemplate(for: roleId))) because of poison.", "\(actor.name) 因中毒跳过了 \(localizedRoleName(roleTemplate(for: roleId)))。"),
+                    toneOverride: .poison
+                )
                 appendNightActionRecord(actor: actor.id, roleId: roleId, targets: targets, note: "poisoned")
                 proceedToNextNightStep()
                 return
@@ -3629,7 +3702,8 @@ final class ClocktowerGameViewModel: ObservableObject {
 
         appendRoleRecord(
             for: actor.id,
-            text: currentLogLine(for: actor, roleId: roleId, targetText: recordTargetText, note: recordNote)
+            text: currentLogLine(for: actor, roleId: roleId, targetText: recordTargetText, note: recordNote),
+            toneOverride: currentActionLogToneOverride
         )
         appendNightActionRecord(actor: actor.id, roleId: roleId, targets: recordTargets, note: recordNote)
         currentActionLogToneOverride = nil
@@ -5035,8 +5109,9 @@ final class ClocktowerGameViewModel: ObservableObject {
         }
     }
 
-    private func appendRoleRecord(for playerID: UUID, text: String) {
-        markPlayer(playerID) { $0.roleLog.append(text) }
+    private func appendRoleRecord(for playerID: UUID, text: String, toneOverride: LogTone? = nil) {
+        let encodedText = encodedRecordedLog(text, toneOverride: toneOverride)
+        markPlayer(playerID) { $0.roleLog.append(encodedText) }
     }
 
     // MARK: - Fortune Teller Red Herring
