@@ -14,7 +14,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Expanded test coverage for Bad Moon Rising and Sects & Violets editions.
 - UI test implementation.
 
-## [1.0.1] - 2026-03-28
+## [1.0.0] - 2026-03-28
 
 ### Fixed
 
@@ -48,7 +48,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Keyboard dismissal now works when tapping outside fields or scrolling in setup / game flow screens.
 - Grimoire info-log coloring now matches the event log for poison/drunk misinformation cases instead of being inferred only from role names in the text.
 
-## [1.0.0] - 2025-03-25
+## [0.1.0] - 2025-03-25
 
 ### Added
 
