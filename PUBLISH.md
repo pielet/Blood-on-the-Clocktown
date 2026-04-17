@@ -98,4 +98,5 @@ Keep a `CHANGELOG.md` or use GitHub Releases. Group entries by:
 
 | Version | Date       | Notes |
 |---------|------------|-------|
+| 1.0.1   | 2026-04-17 | Fix Empath alive-count bug, immediate night kills, show Recluse/Spy role in alignment prompts, split ViewModel extensions. |
 | 1.0.0   | 2026-03-25 | First version. Trouble Brewing fully debugged and tested. Bad Moon Rising, Sects & Violets, and experimental roles included but have known bugs — gameplay logic for those editions is still under active debugging. Bilingual EN/ZH UI. 53 unit + trace tests covering Trouble Brewing. |

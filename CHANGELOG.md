@@ -14,6 +14,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Expanded test coverage for Bad Moon Rising and Sects & Violets editions.
 - UI test implementation.
 
+## [1.0.1] - 2026-04-17
+
+### Fixed
+
+- Empath auto-calculation now correctly counts only alive neighbors when woken up. Previously, pending demon kill targets were still counted as alive.
+- Duplicate passive-info summary text no longer appears above the Complete/Skip buttons during night actions.
+
+### Changed
+
+- Night kills (Demon, Godfather, Shabaloth, Po) now resolve immediately when the Storyteller completes the step, instead of being deferred to dawn. This ensures all subsequent night roles see accurate alive/dead state.
+- Recluse/Spy role name is now shown alongside the player name in alignment registration prompts (Chef pairs, Empath neighbors, Fortune Teller, Virgin nomination, etc.) so the Storyteller can see why the choice is needed.
+- Split `ClocktowerGameViewModel` extensions by responsibility: extracted `+PoisonDrunk`, `+PlayerStatus`, `+Death`, `+LogCodecs` from the monolithic `+Helpers` and `+Localization` files.
+- Removed `pendingNightKill`, `pendingForcedDemonKills`, `pendingForcedNightKills` deferred-kill variables (replaced by immediate resolution).
+
 ## [1.0.0] - 2026-03-28
 
 ### Fixed
