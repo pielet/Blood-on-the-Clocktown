@@ -32,6 +32,38 @@ import Testing
         #expect(game.roleDeck.allSatisfy { $0.state == .used })
         #expect(!game.players.contains { $0.roleId == nil })
     }
+
+    @Test func previousSetupStageWalksBackThroughSetupPhases() {
+        let game = ClocktowerGameViewModel()
+        game.selectTemplate("trouble-brewing")
+        game.phase = .impBluffsReveal
+
+        #expect(game.canReturnToPreviousStage)
+
+        game.returnToPreviousStage()
+        #expect(game.phase == .impBluffs)
+
+        game.returnToPreviousStage()
+        #expect(game.phase == .assignment)
+
+        game.returnToPreviousStage()
+        #expect(game.phase == .playerSetup)
+
+        game.returnToPreviousStage()
+        #expect(game.phase == .templateSelection)
+        #expect(!game.canReturnToPreviousStage)
+    }
+
+    @Test func previousSetupStageDoesNothingDuringActivePlay() {
+        let game = ClocktowerGameViewModel()
+        game.phase = .night
+
+        #expect(!game.canReturnToPreviousStage)
+
+        game.returnToPreviousStage()
+
+        #expect(game.phase == .night)
+    }
 }
 
 // MARK: - Sects & Violets (base)

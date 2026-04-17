@@ -10,20 +10,14 @@ struct TemplateSelectionView: View {
 
             ForEach(game.templates) { template in
                 VStack(alignment: .leading, spacing: 10) {
-                    Button {
-                        game.selectTemplate(template.id)
-                    } label: {
-                        VStack(alignment: .leading, spacing: 6) {
-                            Text(game.localizedTemplateName(template))
-                                .font(.title3.bold())
-                            Text("\(game.ui("Recommended", "推荐配置")): \(game.templateSummary(for: template))")
-                                .font(.caption)
-                                .foregroundStyle(.secondary)
-                        }
-                        .frame(maxWidth: .infinity, alignment: .leading)
+                    VStack(alignment: .leading, spacing: 6) {
+                        Text(game.localizedTemplateName(template))
+                            .font(.title3.bold())
+                        Text("\(game.ui("Recommended", "推荐配置")): \(game.templateSummary(for: template))")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
                     }
-                    .buttonStyle(.plain)
-                    .accessibilityIdentifier("template-\(template.id)")
+                    .frame(maxWidth: .infinity, alignment: .leading)
 
                     Toggle(
                         isOn: Binding(
@@ -38,6 +32,11 @@ struct TemplateSelectionView: View {
                 }
                 .padding()
                 .background(RoundedRectangle(cornerRadius: 12).fill(Color(.secondarySystemGroupedBackground)))
+                .contentShape(Rectangle())
+                .onTapGesture {
+                    game.selectTemplate(template.id)
+                }
+                .accessibilityIdentifier("template-\(template.id)")
             }
         }
     }

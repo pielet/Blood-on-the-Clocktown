@@ -401,6 +401,64 @@ import Testing
         }))
     }
 
+    @Test func empathPassiveInfoTracksLivingNeighborCount() {
+        let game = makeAssignedGame(
+            templateId: "trouble-brewing",
+            roleIds: ["empath", "washerwoman", "chef", "baron", "imp"]
+        )
+        game.phase = .night
+        game.isFirstNightPhase = false
+        game.currentNightSteps = [NightStepTemplate(id: "test-empath", roleId: "empath", condition: .always)]
+        game.currentNightStepIndex = 0
+
+        #expect(game.currentNightPassiveInfoSuggestedNote == "1")
+        #expect(game.currentNightPassiveInfoSelectableNotes() == ["0", "1", "2"])
+
+        game.players[4].alive = false
+
+        #expect(game.currentNightPassiveInfoSuggestedNote == "0")
+    }
+
+    @Test func empathPassiveInfoRespectsFlexibleNeighborRegistration() throws {
+        let game = makeAssignedGame(
+            templateId: "trouble-brewing",
+            roleIds: ["empath", "recluse", "washerwoman", "baron", "imp"]
+        )
+        game.phase = .night
+        game.isFirstNightPhase = false
+        game.currentNightSteps = [NightStepTemplate(id: "test-empath", roleId: "empath", condition: .always)]
+        game.currentNightStepIndex = 0
+
+        let recluse = try #require(game.players.first(where: { $0.roleId == "recluse" }))
+
+        #expect(game.currentNightPassiveInfoSuggestedNote == "1")
+
+        game.setCurrentNightAlignmentSelection(true, for: recluse.id)
+
+        #expect(game.currentNightPassiveInfoSuggestedNote == "2")
+    }
+
+    @Test func chefPassiveInfoShowsPossibleCountsForFlexibleRegistration() throws {
+        let game = makeAssignedGame(
+            templateId: "trouble-brewing",
+            roleIds: ["chef", "washerwoman", "recluse", "imp", "librarian"]
+        )
+        game.phase = .firstNight
+        game.isFirstNightPhase = true
+        game.currentNightSteps = [NightStepTemplate(id: "test-chef", roleId: "chef", condition: .always)]
+        game.currentNightStepIndex = 0
+
+        let recluse = try #require(game.players.first(where: { $0.roleId == "recluse" }))
+
+        #expect(game.currentNightPassiveInfoSuggestedNote == "0")
+        #expect(game.currentNightPassiveInfoSelectableNotes() == ["0", "1"])
+
+        game.setCurrentNightAlignmentSelection(true, for: recluse.id)
+
+        #expect(game.currentNightPassiveInfoSuggestedNote == "1")
+        #expect(game.currentNightPassiveInfoSelectableNotes() == ["1"])
+    }
+
     @Test func displayedDrunkSlayerShotHasNoRealEffect() {
         let game = makeAssignedGame(
             templateId: "trouble-brewing",

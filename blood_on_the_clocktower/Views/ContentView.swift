@@ -11,6 +11,11 @@ func dismissActiveKeyboard() {
 
 struct ContentView: View {
     @EnvironmentObject private var game: ClocktowerGameViewModel
+    @State private var didTriggerPreviousStageGesture = false
+
+    private let previousStageSwipeActivationWidth: CGFloat = 32
+    private let previousStageSwipeThreshold: CGFloat = 96
+    private let previousStageSwipeVerticalTolerance: CGFloat = 80
 
     var body: some View {
         NavigationStack {
@@ -37,6 +42,7 @@ struct ContentView: View {
                 }
             }
             .padding()
+            .contentShape(Rectangle())
             .background {
                 Color.clear
                     .contentShape(Rectangle())
@@ -54,10 +60,11 @@ struct ContentView: View {
                 }
             }
         }
-            .onAppear {
-                if game.players.isEmpty {
-                    game.startTemplateSelection()
-                }
+        .simultaneousGesture(previousStageGesture)
+        .onAppear {
+            if game.players.isEmpty {
+                game.startTemplateSelection()
+            }
         }
     }
 
@@ -126,6 +133,26 @@ struct ContentView: View {
         let minutes = game.phaseSecondsLeft / 60
         let seconds = game.phaseSecondsLeft % 60
         return String(format: "%02d:%02d", minutes, seconds)
+    }
+
+    private var previousStageGesture: some Gesture {
+        DragGesture(minimumDistance: 20)
+            .onChanged { value in
+                guard !didTriggerPreviousStageGesture,
+                      game.canReturnToPreviousStage,
+                      value.startLocation.x <= previousStageSwipeActivationWidth,
+                      value.translation.width >= previousStageSwipeThreshold,
+                      abs(value.translation.height) <= previousStageSwipeVerticalTolerance else {
+                    return
+                }
+
+                didTriggerPreviousStageGesture = true
+                dismissActiveKeyboard()
+                game.returnToPreviousStage()
+            }
+            .onEnded { _ in
+                didTriggerPreviousStageGesture = false
+            }
     }
 }
 

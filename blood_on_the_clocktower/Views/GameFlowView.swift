@@ -3,6 +3,7 @@ import SwiftUI
 struct GameFlowView: View {
     @EnvironmentObject private var game: ClocktowerGameViewModel
     @State private var manualNote = ""
+    @State private var lastPassiveInfoSuggestedNote: String?
     @State private var artistNote = ""
     @State private var fishermanNote = ""
     @State private var amnesiacNote = ""
@@ -43,11 +44,19 @@ struct GameFlowView: View {
                 }
             }
             .scrollDismissesKeyboard(.immediately)
+            .onAppear {
+                syncPassiveInfoSelection(from: nil, to: game.currentNightPassiveInfoSuggestedNote)
+            }
             .onChange(of: game.currentNightStepIndex) { _, _ in
                 manualNote = ""
+                lastPassiveInfoSuggestedNote = nil
+                syncPassiveInfoSelection(from: nil, to: game.currentNightPassiveInfoSuggestedNote)
             }
             .onChange(of: manualNote) { _, newValue in
                 game.currentNightNote = newValue
+            }
+            .onChange(of: game.currentNightPassiveInfoSuggestedNote) { oldValue, newValue in
+                syncPassiveInfoSelection(from: oldValue, to: newValue)
             }
         }
     }
@@ -554,10 +563,11 @@ struct GameFlowView: View {
     }
 
     private func virginRegistrationSection(player: PlayerCard) -> some View {
-        VStack(alignment: .leading, spacing: 8) {
+        let roleName = game.localizedRoleName(game.roleTemplate(for: player.roleId ?? ""))
+        return VStack(alignment: .leading, spacing: 8) {
             Text(game.ui(
-                "Virgin: choose whether \(player.name) registers as Townsfolk.",
-                "贞洁者：选择 \(player.name) 是否登记为镇民。"
+                "Virgin: choose whether \(player.name) (\(roleName)) registers as Townsfolk.",
+                "贞洁者：选择 \(player.name)（\(roleName)）是否登记为镇民。"
             ))
             .font(.caption)
             .foregroundStyle(.secondary)
@@ -782,6 +792,7 @@ struct GameFlowView: View {
             pixieRoleChoiceSection(for: step)
             troubleBrewingRoleChoiceSection(for: step)
             nightAlignmentChoiceSection
+            nightPassiveInfoSection
             nightNoteFieldSection(for: step)
         }
     }
@@ -971,6 +982,48 @@ struct GameFlowView: View {
         }
     }
 
+    @ViewBuilder
+    private var nightPassiveInfoSection: some View {
+        if game.currentNightUsesPassiveInfoSelection {
+            VStack(alignment: .leading, spacing: 8) {
+                Text(game.currentNightPassiveInfoSelectionPrompt())
+                    .font(.caption.weight(.semibold))
+
+                ScrollView(.horizontal, showsIndicators: false) {
+                    HStack(spacing: 6) {
+                        ForEach(game.currentNightPassiveInfoSelectableNotes(), id: \.self) { note in
+                            passiveInfoResultButton(note: note)
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    private func passiveInfoResultButton(note: String) -> some View {
+        let isSelected = manualNote == note
+
+        return Group {
+            if isSelected {
+                Button(note) {
+                    manualNote = note
+                }
+                .tint(.green)
+                .buttonStyle(.borderedProminent)
+                .controlSize(.mini)
+            } else {
+                Button(note) {
+                    manualNote = note
+                }
+                .buttonStyle(.bordered)
+                .controlSize(.mini)
+            }
+        }
+        .transaction { transaction in
+            transaction.animation = nil
+        }
+    }
+
     private func nightAlignmentChoiceRow(player: PlayerCard) -> some View {
         let selectedAlignment = game.currentNightAlignmentSelection(for: player.id)
 
@@ -1152,6 +1205,22 @@ struct GameFlowView: View {
             } else {
                 expandedPlayerIDs.insert(playerID)
             }
+        }
+    }
+
+    private func syncPassiveInfoSelection(from oldValue: String?, to newValue: String?) {
+        defer {
+            lastPassiveInfoSuggestedNote = newValue
+        }
+
+        guard game.currentNightUsesPassiveInfoSelection,
+              let newValue else {
+            return
+        }
+
+        let shouldFollowSuggestedValue = manualNote.isEmpty || manualNote == oldValue || manualNote == lastPassiveInfoSuggestedNote
+        if shouldFollowSuggestedValue {
+            manualNote = newValue
         }
     }
 }
