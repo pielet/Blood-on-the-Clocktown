@@ -11,17 +11,13 @@ struct FlipCardView<Front: View, Back: View>: View {
                 .opacity(isFlipped ? 0 : 1)
 
             front()
-                .rotation3DEffect(
-                    .degrees(180),
-                    axis: (x: 0, y: 1, z: 0),
-                )
+                .scaleEffect(x: -1, y: 1)
                 .opacity(isFlipped ? 1 : 0)
         }
-        .compositingGroup()
         .rotation3DEffect(
             .degrees(isFlipped ? 180 : 0),
             axis: (x: 0, y: 1, z: 0),
-            perspective: 0.8
+            perspective: 0.4
         )
     }
 }

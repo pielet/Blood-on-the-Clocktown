@@ -3,13 +3,19 @@ import SwiftUI
 struct AssignmentView: View {
     @EnvironmentObject private var game: ClocktowerGameViewModel
     @Environment(\.colorScheme) private var colorScheme
+    @Environment(\.horizontalSizeClass) private var horizontalSizeClass
 
     private let activeCardBackAsset = "card_back_active_flat"
     private let inactiveCardBackAsset = "card_back_inactive_flat"
-    private let assignmentColumnCount = 3
     private let assignmentGridSpacing: CGFloat = 10
     private let assignmentGridPadding = EdgeInsets(top: 6, leading: 4, bottom: 6, trailing: 4)
-    private let assignmentButtonAreaHeight: CGFloat = 56
+    private let cardInnerHorizontalPadding: CGFloat = 4
+    private let cardInnerVerticalPadding: CGFloat = 2
+
+    private var isRegularWidth: Bool { horizontalSizeClass == .regular }
+    private var assignmentColumnCount: Int { isRegularWidth ? 4 : 3 }
+    private var assignmentButtonAreaHeight: CGFloat { isRegularWidth ? 80 : 64 }
+    private var cardAspectRatio: CGFloat { 1.38 }
 
     var body: some View {
         GeometryReader { proxy in
@@ -75,8 +81,8 @@ struct AssignmentView: View {
                 assignmentCardBack(isUsed: showsInactiveBack)
             }
             .frame(height: cardHeight)
-            .padding(.horizontal, 4)
-            .padding(.vertical, 2)
+            .padding(.horizontal, cardInnerHorizontalPadding)
+            .padding(.vertical, cardInnerVerticalPadding)
             .contentShape(RoundedRectangle(cornerRadius: 12))
         }
         .buttonStyle(.plain)
@@ -154,33 +160,40 @@ struct AssignmentView: View {
     }
 
     private func assignmentLayout(in size: CGSize) -> AssignmentLayout {
-        let rows = max(1, Int(ceil(Double(game.roleDeck.count) / Double(assignmentColumnCount))))
+        let columnCount = assignmentColumnCount
+        let rows = max(1, Int(ceil(Double(game.roleDeck.count) / Double(columnCount))))
         let visibleRows = min(rows, 3)
         let columns = Array(
             repeating: GridItem(.flexible(), spacing: assignmentGridSpacing),
-            count: assignmentColumnCount
+            count: columnCount
         )
 
-        let totalHorizontalSpacing = CGFloat(assignmentColumnCount - 1) * assignmentGridSpacing
+        let totalHorizontalSpacing = CGFloat(columnCount - 1) * assignmentGridSpacing
         let availableWidth = max(
             0,
             size.width - assignmentGridPadding.leading - assignmentGridPadding.trailing - totalHorizontalSpacing
         )
-        let cardWidth = availableWidth / CGFloat(assignmentColumnCount)
+        let cardWidth = availableWidth / CGFloat(columnCount)
 
         let totalVerticalSpacing = CGFloat(max(0, visibleRows - 1)) * assignmentGridSpacing
-        let availableHeight = max(
-            0,
-            size.height - assignmentButtonAreaHeight - 12 - assignmentGridPadding.top - assignmentGridPadding.bottom - totalVerticalSpacing
-        )
+        let totalInnerVerticalPadding = CGFloat(visibleRows) * cardInnerVerticalPadding * 2
+        let verticalOverhead = assignmentButtonAreaHeight
+            + 12
+            + assignmentGridPadding.top
+            + assignmentGridPadding.bottom
+            + totalVerticalSpacing
+            + totalInnerVerticalPadding
+        let availableHeight = max(0, size.height - verticalOverhead)
         let rowHeight = availableHeight / CGFloat(visibleRows)
-        let preferredCardHeight = cardWidth * 1.38
+        let preferredCardHeight = cardWidth * cardAspectRatio
         let cardHeight = max(108, min(preferredCardHeight, rowHeight))
+        let totalGridHeight = CGFloat(visibleRows) * cardHeight + totalVerticalSpacing + totalInnerVerticalPadding
+        let usesScrollView = rows > visibleRows || totalGridHeight > (size.height - assignmentButtonAreaHeight - 12)
 
         return AssignmentLayout(
             columns: columns,
             cardHeight: cardHeight,
-            usesScrollView: rows > 3
+            usesScrollView: usesScrollView
         )
     }
 

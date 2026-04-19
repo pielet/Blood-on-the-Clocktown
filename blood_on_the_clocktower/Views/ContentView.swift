@@ -11,11 +11,18 @@ func dismissActiveKeyboard() {
 
 struct ContentView: View {
     @EnvironmentObject private var game: ClocktowerGameViewModel
+    @Environment(\.horizontalSizeClass) private var horizontalSizeClass
     @State private var didTriggerPreviousStageGesture = false
 
     private let previousStageSwipeActivationWidth: CGFloat = 32
     private let previousStageSwipeThreshold: CGFloat = 96
     private let previousStageSwipeVerticalTolerance: CGFloat = 80
+
+    private var adaptiveDynamicTypeRange: ClosedRange<DynamicTypeSize> {
+        horizontalSizeClass == .regular
+            ? .xLarge ... .accessibility3
+            : .large ... .accessibility5
+    }
 
     var body: some View {
         NavigationStack {
@@ -60,6 +67,7 @@ struct ContentView: View {
                 }
             }
         }
+        .dynamicTypeSize(adaptiveDynamicTypeRange)
         .simultaneousGesture(previousStageGesture)
         .onAppear {
             if game.players.isEmpty {
