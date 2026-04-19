@@ -11,9 +11,9 @@ final class blood_on_the_clocktowerUITestsLaunchTests: XCTestCase {
         let app = XCUIApplication()
         app.launch()
 
-        let attachment = XCTAttachment(screenshot: app.screenshot())
-        attachment.name = "Launch Screen"
-        attachment.lifetime = .keepAlways
-        add(attachment)
+        XCTAssertTrue(
+            app.staticTexts["template-trouble-brewing"].firstMatch.waitForExistence(timeout: 15),
+            "App should finish launching into the template selection screen"
+        )
     }
 }

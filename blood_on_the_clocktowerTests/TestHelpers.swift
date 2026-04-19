@@ -64,6 +64,11 @@ func runNightStep(
     game.currentNightTargets = targets
     game.currentNightNote = note
     game.completeCurrentNightAction()
+    // If this was the only night step, completeCurrentNightAction triggers
+    // resolveNightDawn which starts a day timer. Invalidate it so it doesn't
+    // leak into subsequent tests via the RunLoop.
+    game.timer?.invalidate()
+    game.timer = nil
 }
 
 // MARK: - Role Team Counting

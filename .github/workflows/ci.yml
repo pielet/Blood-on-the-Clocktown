@@ -88,6 +88,8 @@ jobs:
             -configuration Debug \
             -sdk iphonesimulator \
             -destination "platform=iOS Simulator,name=iPhone 17 Pro" \
+            -parallel-testing-enabled NO \
+            -maximum-concurrent-test-simulator-destinations 1 \
             test \
             -only-testing:blood_on_the_clocktowerUITests \
             -resultBundlePath UITestResults.xcresult

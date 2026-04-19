@@ -404,7 +404,7 @@ import Testing
     @Test func empathPassiveInfoTracksLivingNeighborCount() {
         let game = makeAssignedGame(
             templateId: "trouble-brewing",
-            roleIds: ["empath", "washerwoman", "chef", "baron", "imp"]
+            roleIds: ["empath", "washerwoman", "chef", "librarian", "imp"]
         )
         game.phase = .night
         game.isFirstNightPhase = false
@@ -527,6 +527,7 @@ import Testing
             templateId: "trouble-brewing",
             roleIds: ["poisoner", "librarian", "drunk", "imp", "baron"]
         )
+        game.appLanguage = .english
         let librarian = game.players[1]
         let drunk = game.players[2]
 
@@ -535,7 +536,7 @@ import Testing
 
         let recordedLog = try #require(game.players[1].roleLog.last)
 
-        #expect(game.localizedRecordedLog(recordedLog).contains("drunk"))
+        #expect(game.localizedRecordedLog(recordedLog).contains("Drunk"))
         #expect(game.logTone(forRecordedLog: recordedLog) == .poison)
     }
 
@@ -977,6 +978,7 @@ import Testing
             templateId: "trouble-brewing",
             roleIds: ["poisoner", "ravenkeeper", "washerwoman", "imp", "baron"]
         )
+        game.appLanguage = .english
         let ravenkeeper = game.players[1]
         let target = game.players[2]
 
